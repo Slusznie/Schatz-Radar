@@ -161,6 +161,31 @@ label.chk input{width:22px;height:22px;accent-color:var(--accent)}
 @keyframes gem{0%,100%{transform:scale(1) rotate(-6deg)}50%{transform:scale(1.18) rotate(6deg);filter:drop-shadow(0 0 30px #ffd76a)}}
 #toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;opacity:0;transition:.3s;z-index:50;pointer-events:none;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%)}
+
+/* Sortieren & Filtern (einklappbar) */
+.sf{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:6px 8px;margin:0 0 14px;box-shadow:var(--shadow)}
+.sf-head{display:flex;align-items:center;gap:8px}
+.sf-toggle{flex:1;min-height:48px;border-radius:16px;padding:8px 12px;font-weight:800;font-size:.95rem;color:var(--text);display:flex;align-items:center;gap:8px;text-align:left}
+.sf-toggle .chev{margin-left:auto;color:var(--muted);font-size:.85rem;transition:transform .2s}
+.sf.open .sf-toggle .chev{transform:rotate(180deg)}
+.sf-badge{display:inline-flex;align-items:center;justify-content:center;min-width:1.45em;height:1.45em;padding:0 7px;border-radius:999px;background:var(--accent-bg);border:1px solid rgba(201,138,43,.4);color:var(--accent);font-size:.78rem;font-weight:800;font-variant-numeric:tabular-nums}
+.sf-badge[hidden],#sfReset[hidden]{display:none}
+.sf-body{display:none;padding:10px 8px 12px;border-top:1px solid var(--line);margin-top:4px}
+.sf.open .sf-body{display:block}
+.sf-row{margin-top:12px}
+.sf-row:first-child{margin-top:4px}
+.sf-lbl{font-size:.78rem;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.sf-chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sfchip{min-height:40px;padding:6px 13px;border-radius:999px;background:var(--card2);border:1px solid var(--line);font-weight:700;font-size:.88rem;color:var(--muted);transition:transform .15s,border-color .2s,background .2s}
+.sfchip:active{transform:scale(.97)}
+.sfchip.act{background:var(--accent-bg);color:var(--text);border-color:var(--accent)}
+.sfchip .n{display:inline-flex;align-items:center;justify-content:center;min-width:1.3em;height:1.3em;padding:0 5px;border-radius:999px;background:var(--bg);border:1px solid var(--line);font-size:.75rem;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
+.sfchip.act .n{background:rgba(201,138,43,.22);border-color:rgba(201,138,43,.4);color:var(--accent)}
+.sf-num{width:7.2rem;min-height:40px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:6px 10px;font-size:1rem;color:var(--text)}
+.sf-search{width:100%;min-height:46px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px 14px;font-size:1.05rem;color:var(--text)}
+.sf-check{display:flex;gap:10px;align-items:center;min-height:44px;font-weight:700;font-size:.95rem}
+.sf-check input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.empty .btn{margin-top:10px}
 /* Querformat */
 @media (min-width:900px){
   .wrap{padding:20px 28px}
@@ -218,6 +243,45 @@ label.chk input{width:22px;height:22px;accent-color:var(--accent)}
       <button data-tab="ende" role="tab" aria-selected="false">⏰ Endet bald <span class="tabn" id="tE">0</span></button>
     </div>
     <div class="katbar" id="katbar" aria-label="Kategorien"></div>
+    <div class="sf" id="sf">
+      <div class="sf-head">
+        <button type="button" class="sf-toggle" id="sfToggle" aria-expanded="false" aria-controls="sfBody">Sortieren &amp; Filtern <span class="sf-badge" id="sfBadge" hidden>0</span><span class="chev" aria-hidden="true">▼</span></button>
+        <button type="button" class="btn" id="sfReset" hidden>Zurücksetzen</button>
+      </div>
+      <div class="sf-body" id="sfBody">
+        <div class="sf-row">
+          <div class="sf-lbl">Sortieren</div>
+          <div class="sf-chips" id="sfSort" role="group" aria-label="Sortierung"></div>
+        </div>
+        <div class="sf-row">
+          <div class="sf-lbl">Plattform</div>
+          <div class="sf-chips" id="sfPlat" role="group" aria-label="Plattform"></div>
+        </div>
+        <div class="sf-row">
+          <div class="sf-lbl">Maximalpreis</div>
+          <div class="sf-chips" id="sfPreis" role="group" aria-label="Maximalpreis"></div>
+        </div>
+        <div class="sf-row">
+          <div class="sf-lbl">Mindestgewinn</div>
+          <div class="sf-chips" id="sfGewinn" role="group" aria-label="Mindestgewinn"></div>
+        </div>
+        <div class="sf-row">
+          <div class="sf-lbl">Versandart</div>
+          <div class="sf-chips" id="sfVersand" role="group" aria-label="Versandart"></div>
+        </div>
+        <div class="sf-row">
+          <label class="sf-check"><input type="checkbox" id="sfMega"> Nur Mega-Schätze</label>
+        </div>
+        <div class="sf-row">
+          <div class="sf-lbl">Suche</div>
+          <input class="sf-search" id="sfQuery" type="search" enterkeyhint="search" autocomplete="off" placeholder="Titel, Defekt oder Quelle">
+        </div>
+        <div class="sf-row">
+          <div class="sf-lbl">Zeitraum</div>
+          <div class="sf-chips" id="sfZeit" role="group" aria-label="Zeitraum"></div>
+        </div>
+      </div>
+    </div>
     <div class="cols alle" id="cols">
       <div class="col" id="c-alle"><h2>Alle Funde <span class="c" id="hA"></span></h2><div class="list" id="l-alle"></div></div>
       <div class="col show" id="c-gruen"><h2>🟢 Grün · Sofort <span class="c" id="hG"></span></h2><div class="list" id="l-gruen"></div></div>
@@ -281,7 +345,7 @@ label.chk input{width:22px;height:22px;accent-color:var(--accent)}
     </div>
     <div class="panel">
       <h2>ℹ️ So kommen Funde rein</h2>
-      <p class="sub">Die App liest die Nachrichten der letzten 24 Std. aus dem ntfy-Thema (ntfy.sh hebt sie ca. 12 Std. auf) und blendet Testnachrichten aus. Titel „💎 SCHATZ GEFUNDEN – Gerät“ = grün, „🔥💎 MEGA-SCHATZ“ = Mega, „🟡 GRENZFALL“ / „🟡 NACHFRAGEN“ = gelb, „⏰“ = endet bald. Oben filterst du nach Farbe und Kategorie. Das genaue Format steht in der README.</p>
+      <p class="sub">Die App liest die Nachrichten der letzten 24 Std. aus dem ntfy-Thema (ntfy.sh hebt sie ca. 12 Std. auf) und blendet Testnachrichten aus. Titel „💎 SCHATZ GEFUNDEN – Gerät“ = grün, „🔥💎 MEGA-SCHATZ“ = Mega, „🟡 GRENZFALL“ / „🟡 NACHFRAGEN“ = gelb, „⏰“ = endet bald. Oben filterst du nach Farbe, Kategorie, Plattform, Preis, Gewinn und mehr. Das genaue Format steht in der README.</p>
     </div>
   </section>
 </div>
@@ -652,12 +716,92 @@ var SR = (function(){
     return categoryOf(deal) === kat;
   }
 
-  function filterDeals(list, tab, kat, nowSec){
-    return (list||[]).filter(function(d){ return matchesTab(d, tab, nowSec) && matchesKat(d, kat); });
+  function defaultExtras(){
+    return {platforms:[], maxPreis:null, minGewinn:null, versand:"alle", megaOnly:false, q:"", zeit:"alle"};
   }
 
-  function tabCounts(list, kat, nowSec){
-    var f = (list||[]).filter(function(d){ return matchesKat(d, kat); });
+  function normalizeExtras(opts){
+    var d = defaultExtras();
+    if (!opts || typeof opts !== "object") return d;
+    var plats = opts.platforms;
+    if (typeof plats === "string") plats = [plats];
+    if (Array.isArray(plats)){
+      var seen = {}, out = [];
+      plats.forEach(function(p){
+        p = String(p==null?"":p).trim();
+        if (p && !seen[p]){ seen[p] = true; out.push(p); }
+      });
+      d.platforms = out;
+    }
+    var maxP = opts.maxPreis, minG = opts.minGewinn;
+    if (maxP === "" || maxP == null) d.maxPreis = null;
+    else { maxP = typeof maxP === "number" ? maxP : toNum(maxP); d.maxPreis = (maxP != null && isFinite(maxP)) ? maxP : null; }
+    if (minG === "" || minG == null) d.minGewinn = null;
+    else { minG = typeof minG === "number" ? minG : toNum(minG); d.minGewinn = (minG != null && isFinite(minG)) ? minG : null; }
+    d.versand = (opts.versand === "versand" || opts.versand === "abholung") ? opts.versand : "alle";
+    d.megaOnly = !!opts.megaOnly;
+    d.q = opts.q == null ? "" : String(opts.q);
+    d.zeit = (opts.zeit === "3h" || opts.zeit === "12h" || opts.zeit === "heute") ? opts.zeit : "alle";
+    return d;
+  }
+
+  function countActiveFilters(extras){
+    var x = normalizeExtras(extras), n = 0;
+    if (x.platforms.length) n++;
+    if (x.maxPreis != null) n++;
+    if (x.minGewinn != null) n++;
+    if (x.versand !== "alle") n++;
+    if (x.megaOnly) n++;
+    if (String(x.q).trim()) n++;
+    if (x.zeit !== "alle") n++;
+    return n;
+  }
+
+  function rendite(deal){
+    if (!deal || deal.preis == null || deal.preis <= 0 || deal.gewinn == null) return null;
+    return deal.gewinn / deal.preis;
+  }
+
+  function matchesPlatforms(deal, platforms){
+    if (!platforms || !platforms.length) return true;
+    return platforms.indexOf(deal.plattform || "") >= 0;
+  }
+
+  function matchesQuery(deal, q){
+    q = String(q || "").trim().toLowerCase();
+    if (!q) return true;
+    var hay = [deal.geraet, deal.defekt, deal.quelle, deal.plattform].filter(Boolean).join(" ").toLowerCase();
+    return hay.indexOf(q) >= 0;
+  }
+
+  function matchesZeit(deal, zeit, nowSec){
+    if (!zeit || zeit === "alle") return true;
+    var t = deal && deal.time != null ? deal.time : 0;
+    if (zeit === "3h") return (nowSec - t) <= 3*3600;
+    if (zeit === "12h") return (nowSec - t) <= 12*3600;
+    if (zeit === "heute") return berlinParts(new Date(t*1000)).key === berlinParts(new Date(nowSec*1000)).key;
+    return true;
+  }
+
+  function matchesExtras(deal, extras, nowSec, megaLimit, skip){
+    var x = normalizeExtras(extras);
+    if (skip !== "platforms" && !matchesPlatforms(deal, x.platforms)) return false;
+    if (skip !== "maxPreis" && x.maxPreis != null && !(deal.preis != null && deal.preis <= x.maxPreis)) return false;
+    if (skip !== "minGewinn" && x.minGewinn != null && !(deal.gewinn != null && deal.gewinn >= x.minGewinn)) return false;
+    if (skip !== "versand" && x.versand === "abholung" && !deal.abholung) return false;
+    if (skip !== "versand" && x.versand === "versand" && deal.abholung) return false;
+    if (skip !== "megaOnly" && x.megaOnly && !isMega(deal, megaLimit)) return false;
+    if (skip !== "q" && !matchesQuery(deal, x.q)) return false;
+    if (skip !== "zeit" && !matchesZeit(deal, x.zeit, nowSec)) return false;
+    return true;
+  }
+
+  function filterDeals(list, tab, kat, nowSec, extras, megaLimit){
+    return (list||[]).filter(function(d){ return matchesTab(d, tab, nowSec) && matchesKat(d, kat) && matchesExtras(d, extras, nowSec, megaLimit); });
+  }
+
+  function tabCounts(list, kat, nowSec, extras, megaLimit){
+    var f = (list||[]).filter(function(d){ return matchesKat(d, kat) && matchesExtras(d, extras, nowSec, megaLimit); });
     return {
       alle: f.length,
       gruen: f.filter(function(d){ return d.ampel === "gruen"; }).length,
@@ -666,18 +810,62 @@ var SR = (function(){
     };
   }
 
-  function categoryCounts(list, tab, nowSec){
-    var f = (list||[]).filter(function(d){ return matchesTab(d, tab, nowSec); });
+  function categoryCounts(list, tab, nowSec, extras, megaLimit){
+    var f = (list||[]).filter(function(d){ return matchesTab(d, tab, nowSec) && matchesExtras(d, extras, nowSec, megaLimit); });
     var c = {};
     CAT_LIST.forEach(function(k){ c[k] = 0; });
     f.forEach(function(d){ var k = categoryOf(d); if (c[k] == null) c[k] = 0; c[k]++; });
     return c;
   }
 
+  function platformsOf(list){
+    var seen = {}, out = [];
+    (list||[]).forEach(function(d){
+      var p = d && d.plattform ? String(d.plattform).trim() : "";
+      if (p && !seen[p]){ seen[p] = true; out.push(p); }
+    });
+    out.sort(function(a,b){ return a.localeCompare(b, "de"); });
+    return out;
+  }
+
+  function miss(v){ return v == null || (typeof v === "number" && !isFinite(v)); }
+
+  function sortDeals(list, mode){
+    var arr = (list||[]).slice();
+    var byTime = function(a,b){ return (b.time||0) - (a.time||0); };
+    var cmpVal = function(va, vb, dir){
+      var na = miss(va), nb = miss(vb);
+      if (na && nb) return 0;
+      if (na) return 1;
+      if (nb) return -1;
+      return dir * (va - vb);
+    };
+    var keyFn;
+    if (mode === "gewinn-desc") keyFn = function(d){ return d.gewinn; };
+    else if (mode === "preis-asc" || mode === "preis-desc") keyFn = function(d){ return d.preis; };
+    else if (mode === "rendite") keyFn = rendite;
+    else if (mode === "ende") keyFn = function(d){ return d.ende; };
+    else { arr.sort(byTime); return arr; }
+    var dir = (mode === "preis-asc" || mode === "ende") ? 1 : -1;
+    arr.sort(function(a,b){ return cmpVal(keyFn(a), keyFn(b), dir) || byTime(a,b); });
+    return arr;
+  }
+
+  var SORT_LIST = [
+    {id:"neueste", label:"Neueste"},
+    {id:"gewinn-desc", label:"Gewinn hoch→niedrig"},
+    {id:"preis-asc", label:"Preis niedrig→hoch"},
+    {id:"preis-desc", label:"Preis hoch→niedrig"},
+    {id:"rendite", label:"Rendite"},
+    {id:"ende", label:"Endet zuerst"}
+  ];
+
   return {safeImageUrl:safeImageUrl,dealKey:dealKey,mergeDeal:mergeDeal,eur:eur,eurSigned:eurSigned,toNum:toNum,isTest:isTest,parseMessage:parseMessage,parseData:parseData,parseEnde:parseEnde,isMega:isMega,
           endetBald:endetBald,berlinParts:berlinParts,nextRound:nextRound,isNight:isNight,calc:calc,pad:pad,
           CAT_LIST:CAT_LIST,CAT_ICON:CAT_ICON,CAT_TINT:CAT_TINT,normKategorie:normKategorie,detectCategory:detectCategory,categoryOf:categoryOf,
-          matchesTab:matchesTab,filterDeals:filterDeals,tabCounts:tabCounts,categoryCounts:categoryCounts};
+          matchesTab:matchesTab,filterDeals:filterDeals,tabCounts:tabCounts,categoryCounts:categoryCounts,
+          defaultExtras:defaultExtras,normalizeExtras:normalizeExtras,countActiveFilters:countActiveFilters,matchesExtras:matchesExtras,
+          platformsOf:platformsOf,sortDeals:sortDeals,rendite:rendite,SORT_LIST:SORT_LIST};
 })();
 if (typeof module !== "undefined") module.exports = SR;
 </script>
@@ -701,6 +889,13 @@ if (typeof module !== "undefined") module.exports = SR;
   var seen = new Set(store.get("seen",[]));
   var firstLoad = true, es = null, pollT = null, wake = null, tab = "alle", kat = "";
   var megaQueue = [];
+  var sortMode = "neueste";
+  var extras = SR.defaultExtras();
+  var sfOpen = false;
+  var PREIS_CHIPS = [100,150,250,350];
+  var GEWINN_CHIPS = [30,60,100];
+  var VERSAND_LIST = [{id:"alle",label:"Alle"},{id:"versand",label:"Nur Versand"},{id:"abholung",label:"Nur Abholung Dörpen"}];
+  var ZEIT_LIST = [{id:"alle",label:"Alle"},{id:"3h",label:"Letzte 3 Std."},{id:"12h",label:"Letzte 12 Std."},{id:"heute",label:"Heute"}];
 
   var eur = SR.eur;
   function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
@@ -766,6 +961,138 @@ if (typeof module !== "undefined") module.exports = SR;
     store.set("filterKat", kat);
     if (!skipSave) render();
   }
+
+  /* ---------- Sortieren & Filtern ---------- */
+  function saveSf(){ store.set("filterSort", sortMode); store.set("filterExtra", extras); store.set("sfOpen", sfOpen); }
+  function loadSf(){
+    var s = store.get("filterSort","neueste");
+    sortMode = SR.SORT_LIST.some(function(x){ return x.id===s; }) ? s : "neueste";
+    extras = SR.normalizeExtras(store.get("filterExtra", {}));
+    sfOpen = !!store.get("sfOpen", false);
+  }
+  function resetSf(alsoKat){
+    sortMode = "neueste";
+    extras = SR.defaultExtras();
+    if (alsoKat){ kat = ""; store.set("filterKat", kat); }
+    saveSf();
+    syncSf(); render();
+  }
+  function setSfOpen(on){
+    sfOpen = !!on;
+    var box = $("sf"); if (box) box.classList.toggle("open", sfOpen);
+    var tog = $("sfToggle"); if (tog) tog.setAttribute("aria-expanded", sfOpen ? "true" : "false");
+    store.set("sfOpen", sfOpen);
+  }
+  function chipBtn(id, label, act, extra){
+    return '<button type="button" class="sfchip'+(act?" act":"")+'" data-id="'+esc(id)+'"'+(extra||"")+'>'+label+'</button>';
+  }
+  function fillStaticChips(){
+    $("sfSort").innerHTML = SR.SORT_LIST.map(function(x){ return chipBtn(x.id, esc(x.label), false); }).join("");
+    $("sfPreis").innerHTML = PREIS_CHIPS.map(function(n){ return chipBtn(String(n), "≤ "+n+" €", false); }).join("")+
+      '<input class="sf-num" id="sfMaxPreis" type="number" inputmode="decimal" min="0" step="1" placeholder="eigen">';
+    $("sfGewinn").innerHTML = GEWINN_CHIPS.map(function(n){ return chipBtn(String(n), "≥ "+n+" €", false); }).join("")+
+      '<input class="sf-num" id="sfMinGewinn" type="number" inputmode="decimal" min="0" step="1" placeholder="eigen">';
+    $("sfVersand").innerHTML = VERSAND_LIST.map(function(x){ return chipBtn(x.id, esc(x.label), false); }).join("");
+    $("sfZeit").innerHTML = ZEIT_LIST.map(function(x){ return chipBtn(x.id, esc(x.label), false); }).join("");
+  }
+  function numOrNull(el){
+    if (!el) return null;
+    var v = String(el.value||"").trim();
+    if (!v) return null;
+    return SR.toNum(v);
+  }
+  function setNumField(el, v){
+    if (!el) return;
+    if (el === document.activeElement) return; // beim Tippen nicht überschreiben
+    el.value = (v == null || v === "") ? "" : String(v);
+  }
+  function syncSf(){
+    var n = SR.countActiveFilters(extras);
+    var badge = $("sfBadge"), reset = $("sfReset");
+    if (badge){ badge.textContent = n; badge.hidden = n === 0; }
+    if (reset) reset.hidden = !(n || sortMode !== "neueste");
+    var box = $("sf"); if (box) box.classList.toggle("open", sfOpen);
+    var tog = $("sfToggle"); if (tog) tog.setAttribute("aria-expanded", sfOpen ? "true" : "false");
+    function mark(boxId, cur){
+      var box = $(boxId); if (!box) return;
+      box.querySelectorAll(".sfchip").forEach(function(b){ b.classList.toggle("act", b.dataset.id === String(cur)); });
+    }
+    mark("sfSort", sortMode);
+    mark("sfVersand", extras.versand);
+    mark("sfZeit", extras.zeit);
+    var preisBox = $("sfPreis");
+    if (preisBox) preisBox.querySelectorAll(".sfchip").forEach(function(b){ b.classList.toggle("act", extras.maxPreis != null && Number(b.dataset.id) === extras.maxPreis); });
+    var gewBox = $("sfGewinn");
+    if (gewBox) gewBox.querySelectorAll(".sfchip").forEach(function(b){ b.classList.toggle("act", extras.minGewinn != null && Number(b.dataset.id) === extras.minGewinn); });
+    setNumField($("sfMaxPreis"), extras.maxPreis);
+    setNumField($("sfMinGewinn"), extras.minGewinn);
+    var mega = $("sfMega"); if (mega && mega !== document.activeElement) mega.checked = !!extras.megaOnly;
+    var q = $("sfQuery"); if (q && q !== document.activeElement) q.value = extras.q || "";
+  }
+  function renderPlatChips(list){
+    var box = $("sfPlat"); if (!box) return;
+    var names = SR.platformsOf(list);
+    extras.platforms.forEach(function(p){ if (names.indexOf(p) < 0) names.push(p); });
+    if (!names.length){ box.innerHTML = '<span class="chip">keine Angabe</span>'; return; }
+    var counts = {};
+    (list||[]).forEach(function(d){ if (d.plattform) counts[d.plattform] = (counts[d.plattform]||0)+1; });
+    box.innerHTML = names.map(function(p){
+      var on = extras.platforms.indexOf(p) >= 0;
+      return chipBtn(p, esc(p)+'<span class="n">'+(counts[p]||0)+'</span>', on);
+    }).join("");
+    box.querySelectorAll(".sfchip").forEach(function(b){
+      b.onclick = function(){
+        var p = b.dataset.id, i = extras.platforms.indexOf(p);
+        if (i >= 0) extras.platforms.splice(i,1); else extras.platforms.push(p);
+        extras = SR.normalizeExtras(extras); saveSf(); render();
+      };
+    });
+  }
+  function bindSf(){
+    fillStaticChips();
+    $("sfToggle").onclick = function(){ setSfOpen(!sfOpen); };
+    $("sfReset").onclick = function(){ resetSf(false); };
+    $("sfSort").onclick = function(ev){
+      var b = ev.target.closest(".sfchip"); if (!b) return;
+      sortMode = b.dataset.id; saveSf(); render();
+    };
+    $("sfVersand").onclick = function(ev){
+      var b = ev.target.closest(".sfchip"); if (!b) return;
+      extras.versand = b.dataset.id; extras = SR.normalizeExtras(extras); saveSf(); render();
+    };
+    $("sfZeit").onclick = function(ev){
+      var b = ev.target.closest(".sfchip"); if (!b) return;
+      extras.zeit = b.dataset.id; extras = SR.normalizeExtras(extras); saveSf(); render();
+    };
+    $("sfPreis").addEventListener("click", function(ev){
+      var b = ev.target.closest(".sfchip"); if (!b) return;
+      var v = Number(b.dataset.id);
+      extras.maxPreis = (extras.maxPreis === v) ? null : v;
+      extras = SR.normalizeExtras(extras); saveSf(); render();
+    });
+    $("sfGewinn").addEventListener("click", function(ev){
+      var b = ev.target.closest(".sfchip"); if (!b) return;
+      var v = Number(b.dataset.id);
+      extras.minGewinn = (extras.minGewinn === v) ? null : v;
+      extras = SR.normalizeExtras(extras); saveSf(); render();
+    });
+    function onNum(id, key){
+      var el = $(id);
+      var apply = function(){ extras[key] = numOrNull(el); extras = SR.normalizeExtras(extras); saveSf(); render(); };
+      el.addEventListener("change", apply);
+      el.addEventListener("keydown", function(ev){ if (ev.key === "Enter"){ ev.preventDefault(); el.blur(); apply(); } });
+    }
+    onNum("sfMaxPreis","maxPreis");
+    onNum("sfMinGewinn","minGewinn");
+    $("sfMega").onchange = function(){ extras.megaOnly = $("sfMega").checked; extras = SR.normalizeExtras(extras); saveSf(); render(); };
+    var qTimer = null;
+    $("sfQuery").addEventListener("input", function(){
+      extras.q = $("sfQuery").value;
+      clearTimeout(qTimer);
+      qTimer = setTimeout(function(){ extras = SR.normalizeExtras(extras); saveSf(); render(); }, 180);
+    });
+  }
+
   document.querySelectorAll("[data-tab]").forEach(function(b){ b.onclick=function(){ setTab(b.dataset.tab); if (window.innerWidth>=900 && tab!=="alle"){ var el=$("c-"+tab); if (el) el.scrollIntoView({behavior:"smooth",block:"start"});} }; });
 
   /* ---------- Rendering ---------- */
@@ -805,38 +1132,40 @@ if (typeof module !== "undefined") module.exports = SR;
   function render(){
     var now = nowSec(), today = SR.berlinParts(new Date()).key;
     var all = Object.keys(deals).map(function(k){ return deals[k]; }).filter(function(d){ return now - d.time <= 86400; });
-    all.sort(function(a,b){ return b.time - a.time; });
+    all = SR.sortDeals(all, "neueste");
     var gAll = all.filter(function(d){ return d.ampel==="gruen"; });
     var yAll = all.filter(function(d){ return d.ampel==="gelb"; });
-    var eAll = all.filter(function(d){ return SR.endetBald(d, now); }).sort(function(a,b){ return (a.ende||1e12)-(b.ende||1e12); });
+    var eAll = all.filter(function(d){ return SR.endetBald(d, now); });
     var todays = all.filter(function(d){ return SR.berlinParts(new Date(d.time*1000)).key === today; });
     var sum = todays.reduce(function(s,d){ return s + (d.gewinn>0 && d.ampel==="gruen" ? d.gewinn : 0); },0);
     var sumY = todays.reduce(function(s,d){ return s + (d.gewinn>0 && d.ampel==="gelb" ? d.gewinn : 0); },0);
     $("sum").textContent = eur(sum);
     $("cntToday").textContent = todays.length ? todays.length+" Fund"+(todays.length>1?"e":"")+" heute"+(sumY?" · +"+eur(sumY)+" gelb":"") : "";
     var megas = gAll.filter(function(d){ return SR.isMega(d,cfg.mega); }).length;
-    // Kacheln: Gesamtzahlen (unabhängig von der Kategorie)
+    // Kacheln: Gesamtzahlen (unabhängig von Kategorie und Extra-Filtern)
     $("nG").textContent = gAll.length; $("nY").textContent = yAll.length; $("nE").textContent = eAll.length;
     $("sG").textContent = megas ? "💎 "+megas+" Mega" : (gAll.length ? "↗ "+eur(gAll.reduce(function(s,d){return s+(d.gewinn||0);},0)) : "–");
     $("sY").textContent = yAll.length ? yAll.length+" Deal(s) prüfen" : "–";
     $("sE").textContent = "< 3 Std.";
-    // Tab-Badges und Listen: kombiniert mit gewählter Kategorie
-    var tc = SR.tabCounts(all, kat, now);
+    // Tab-Badges und Listen: Kategorie + Extra-Filter (ohne den Tab selbst)
+    var tc = SR.tabCounts(all, kat, now, extras, cfg.mega);
     $("tA").textContent = tc.alle; $("tG").textContent = tc.gruen; $("tY").textContent = tc.gelb; $("tE").textContent = tc.ende;
-    var g = SR.filterDeals(gAll, "alle", kat, now);
-    var y = SR.filterDeals(yAll, "alle", kat, now);
-    var e = SR.filterDeals(eAll, "alle", kat, now);
-    var mixed = SR.filterDeals(all, tab, kat, now);
+    var g = SR.sortDeals(SR.filterDeals(all, "gruen", kat, now, extras, cfg.mega), sortMode);
+    var y = SR.sortDeals(SR.filterDeals(all, "gelb", kat, now, extras, cfg.mega), sortMode);
+    var e = SR.sortDeals(SR.filterDeals(all, "ende", kat, now, extras, cfg.mega), sortMode);
+    var mixed = SR.sortDeals(SR.filterDeals(all, tab, kat, now, extras, cfg.mega), sortMode);
     $("hA").textContent = mixed.length; $("hG").textContent = g.length; $("hY").textContent = y.length; $("hE").textContent = e.length;
     var nr = SR.nextRound(new Date());
+    var extraOn = SR.countActiveFilters(extras) > 0;
+    var emptyReset = '<div class="empty"><span class="big">🔭</span><b>Keine Funde für diese Filter</b><br><button type="button" class="btn" data-sf-reset>Zurücksetzen</button></div>';
     var emptyMsg = function(txt){ return '<div class="empty"><span class="big">🔭</span><b>'+txt+'</b><br>Nächste Runde um '+nr.label+' Uhr'+(nr.morgen?' (morgen)':'')+'.</div>'; };
-    var emptyFilter = kat ? "Keine Funde in „"+kat+"“" : (cfg.topic||DEMO ? "Noch keine Schätze heute" : "Noch kein ntfy-Thema eingetragen – unten auf ⚙️ Einstellungen tippen");
-    $("l-alle").innerHTML = mixed.length ? mixed.map(function(d){return card(d,now);}).join("") : emptyMsg(emptyFilter);
-    $("l-gruen").innerHTML = g.length ? g.map(function(d){return card(d,now);}).join("") : emptyMsg(kat ? "Keine grünen Funde in „"+kat+"“" : (cfg.topic||DEMO ? "Noch keine Schätze heute" : "Noch kein ntfy-Thema eingetragen – unten auf ⚙️ Einstellungen tippen"));
-    $("l-gelb").innerHTML = y.length ? y.map(function(d){return card(d,now);}).join("") : emptyMsg(kat ? "Nichts zum Prüfen in „"+kat+"“" : "Gerade nichts zum Prüfen");
-    $("l-ende").innerHTML = e.length ? e.map(function(d){return card(d,now);}).join("") : emptyMsg(kat ? "Nichts läuft bald ab in „"+kat+"“" : "Nichts läuft bald ab");
-    // Kategorie-Chips: nur Kategorien mit mindestens 1 Fund im aktuellen Tab
-    var cc = SR.categoryCounts(all, tab, now);
+    var listHtml = function(arr, idleTxt){ return arr.length ? arr.map(function(d){return card(d,now);}).join("") : (extraOn || kat ? emptyReset : emptyMsg(idleTxt)); };
+    $("l-alle").innerHTML = listHtml(mixed, kat ? "Keine Funde in „"+kat+"“" : (cfg.topic||DEMO ? "Noch keine Schätze heute" : "Noch kein ntfy-Thema eingetragen – unten auf ⚙️ Einstellungen tippen"));
+    $("l-gruen").innerHTML = listHtml(g, kat ? "Keine grünen Funde in „"+kat+"“" : (cfg.topic||DEMO ? "Noch keine Schätze heute" : "Noch kein ntfy-Thema eingetragen – unten auf ⚙️ Einstellungen tippen"));
+    $("l-gelb").innerHTML = listHtml(y, kat ? "Nichts zum Prüfen in „"+kat+"“" : "Gerade nichts zum Prüfen");
+    $("l-ende").innerHTML = listHtml(e, kat ? "Nichts läuft bald ab in „"+kat+"“" : "Nichts läuft bald ab");
+    // Kategorie-Chips: Zahl nach aktuellem Tab + Extra-Filtern (ohne die Kategorie selbst)
+    var cc = SR.categoryCounts(all, tab, now, extras, cfg.mega);
     var bar = $("katbar"), chips = "";
     SR.CAT_LIST.forEach(function(name){
       if (!cc[name] && kat!==name) return;
@@ -845,6 +1174,9 @@ if (typeof module !== "undefined") module.exports = SR;
     });
     bar.innerHTML = chips;
     bar.querySelectorAll("[data-kat]").forEach(function(b){ b.onclick = function(){ setKat(b.dataset.kat); }; });
+    renderPlatChips(all);
+    syncSf();
+    document.querySelectorAll("[data-sf-reset]").forEach(function(b){ b.onclick = function(){ resetSf(true); }; });
     all.forEach(function(d){ d._neu = false; });
     document.querySelectorAll("[data-bg]").forEach(function(el){ var u = SR.safeImageUrl(el.dataset.bg); if (u) el.style.backgroundImage = 'url("'+u+'")'; });
     document.querySelectorAll("[data-calc]").forEach(function(b){ b.onclick = function(){ toCalc(deals[b.dataset.calc]); }; });
@@ -1012,6 +1344,7 @@ if (typeof module !== "undefined") module.exports = SR;
 
   /* ---------- Start ---------- */
   applyTheme(); loadSettings(); loadCalc(); runCalc();
+  loadSf(); bindSf(); syncSf();
   kat = store.get("filterKat",""); if (typeof kat !== "string") kat = "";
   setTab(store.get("filterTab","alle"), true); tick(); setInterval(tick, 1000);
   if (params.get("theme")) { cfg.theme = params.get("theme"); applyTheme(); }
