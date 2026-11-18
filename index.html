@@ -63,10 +63,20 @@ header.top{display:flex;align-items:center;gap:12px;padding:6px 0 10px}
 .tile.y{border-left:5px solid var(--yellow)} .tile.y .s{color:var(--yellow)}
 .tile.e{border-left:5px solid var(--orange)} .tile.e .s{color:var(--orange)}
 .tile.sel{border-color:var(--accent)}
-/* Tabs */
-.tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px;margin:18px 0 14px}
-.tabs button{flex:1;border-radius:999px;padding:10px 6px;font-weight:700;color:var(--muted);font-size:.95rem;transition:background .2s,color .2s}
+/* Tabs & Kategorie-Chips (groß für Tablet-Touch) */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:6px;margin:18px 0 10px}
+.tabs button{flex:1 1 22%;min-width:0;min-height:48px;border-radius:16px;padding:10px 8px;font-weight:700;color:var(--muted);font-size:.92rem;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .2s,color .2s}
 .tabs button.act{background:var(--card2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.tabs .tabn{display:inline-flex;align-items:center;justify-content:center;min-width:1.45em;height:1.45em;padding:0 7px;border-radius:999px;background:var(--bg);border:1px solid var(--line);font-size:.78rem;font-weight:800;font-variant-numeric:tabular-nums}
+.tabs button.act .tabn{background:var(--accent-bg);border-color:rgba(201,138,43,.4);color:var(--accent)}
+.katbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;min-height:0}
+.katbar:empty{display:none}
+.katchip{min-height:44px;padding:8px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-weight:700;font-size:.9rem;color:var(--muted);display:inline-flex;align-items:center;gap:8px;box-shadow:var(--shadow);transition:transform .15s,border-color .2s,background .2s}
+.katchip:active{transform:scale(.97)}
+.katchip .n{display:inline-flex;align-items:center;justify-content:center;min-width:1.4em;height:1.4em;padding:0 6px;border-radius:999px;background:var(--card2);border:1px solid var(--line);font-size:.78rem;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
+.katchip.act{background:var(--accent-bg);color:var(--text);border-color:var(--accent)}
+.katchip.act .n{background:rgba(201,138,43,.22);border-color:rgba(201,138,43,.4);color:var(--accent)}
+.chip.kat{background:var(--bg);color:var(--text)}
 .cols{display:block}
 .col h2{display:none}
 .col{display:none}
@@ -158,9 +168,14 @@ label.chk input{width:22px;height:22px;accent-color:var(--accent)}
   .tiles{margin-top:0;grid-template-columns:1fr;grid-template-rows:repeat(3,1fr)}
   .tile{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .tile .n{order:2;font-size:2.2rem}
-  .tabs{display:none}
-  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
-  .col{display:block}
+  .tabs{display:flex;margin-top:18px}
+  .tabs button{font-size:1rem;min-height:52px}
+  .cols.alle{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px}
+  .cols.alle .col{display:block}
+  .cols.alle #c-alle{display:none}
+  .cols.single{display:block;margin-top:8px}
+  .cols.single .col{display:none}
+  .cols.single .col.show{display:block}
   .col h2{display:flex;justify-content:space-between;align-items:center;font-size:1rem;font-weight:800;margin-bottom:10px;padding:0 4px}
   .col h2 .c{color:var(--muted)}
   .deal{grid-template-columns:auto 1fr auto}
@@ -196,12 +211,15 @@ label.chk input{width:22px;height:22px;accent-color:var(--accent)}
         <button class="tile e" data-tab="ende"><div><div class="t">Endet bald</div><div class="s" id="sE">&lt; 3 Std.</div></div><div class="n" id="nE">0</div></button>
       </div>
     </div>
-    <div class="tabs" id="tabs">
-      <button data-tab="gruen" class="act">Grün (<span id="tG">0</span>)</button>
-      <button data-tab="gelb">Gelb (<span id="tY">0</span>)</button>
-      <button data-tab="ende">Endet bald (<span id="tE">0</span>)</button>
+    <div class="tabs" id="tabs" role="tablist">
+      <button data-tab="alle" class="act" role="tab" aria-selected="true">Alle <span class="tabn" id="tA">0</span></button>
+      <button data-tab="gruen" role="tab" aria-selected="false">💎 Grün <span class="tabn" id="tG">0</span></button>
+      <button data-tab="gelb" role="tab" aria-selected="false">🟡 Gelb <span class="tabn" id="tY">0</span></button>
+      <button data-tab="ende" role="tab" aria-selected="false">⏰ Endet bald <span class="tabn" id="tE">0</span></button>
     </div>
-    <div class="cols">
+    <div class="katbar" id="katbar" aria-label="Kategorien"></div>
+    <div class="cols alle" id="cols">
+      <div class="col" id="c-alle"><h2>Alle Funde <span class="c" id="hA"></span></h2><div class="list" id="l-alle"></div></div>
       <div class="col show" id="c-gruen"><h2>🟢 Grün · Sofort <span class="c" id="hG"></span></h2><div class="list" id="l-gruen"></div></div>
       <div class="col" id="c-gelb"><h2>🟡 Gelb · Prüfen <span class="c" id="hY"></span></h2><div class="list" id="l-gelb"></div></div>
       <div class="col" id="c-ende"><h2>⏰ Endet bald <span class="c" id="hE"></span></h2><div class="list" id="l-ende"></div></div>
@@ -263,7 +281,7 @@ label.chk input{width:22px;height:22px;accent-color:var(--accent)}
     </div>
     <div class="panel">
       <h2>ℹ️ So kommen Funde rein</h2>
-      <p class="sub">Die App liest die Nachrichten der letzten 24 Std. aus dem ntfy-Thema (ntfy.sh hebt sie ca. 12 Std. auf) und blendet Testnachrichten aus. Titel „💎 SCHATZ GEFUNDEN – Gerät“ = grün, „🔥💎 MEGA-SCHATZ“ = Mega, „🟡“ = gelb, „⏰“ = endet bald. Das genaue Format steht in der README.</p>
+      <p class="sub">Die App liest die Nachrichten der letzten 24 Std. aus dem ntfy-Thema (ntfy.sh hebt sie ca. 12 Std. auf) und blendet Testnachrichten aus. Titel „💎 SCHATZ GEFUNDEN – Gerät“ = grün, „🔥💎 MEGA-SCHATZ“ = Mega, „🟡 GRENZFALL“ / „🟡 NACHFRAGEN“ = gelb, „⏰“ = endet bald. Oben filterst du nach Farbe und Kategorie. Das genaue Format steht in der README.</p>
     </div>
   </section>
 </div>
@@ -431,6 +449,11 @@ var SR = (function(){
     deal.ende = parseEnde(deal.endeTxt, deal.time) || parseEnde(deal.titelEnde, deal.time);
     deal.abholung = /abhol|dörpen|doerpen/i.test((deal.preisTxt||"")+" "+(deal.quelle||""));
     deal.plattform = platform(deal.quelle);
+    var explKat = null;
+    if (d && typeof d === "object" && (d.kategorie != null || d.category != null))
+      explKat = d.kategorie != null ? d.kategorie : d.category;
+    if (explKat == null) explKat = pick(f,["kategorie","category"]);
+    deal.kategorie = detectCategoryFromParts(deal.geraet, title, body, explKat);
     if (deal.ampel === "rot") return null; // rote Funde gehören nicht aufs Radar
     // Erinnerung ohne Ampel: nicht automatisch grün (zählt nicht in "Gewinn heute", nur "Endet bald")
     if (!deal.ampel) deal.ampel = deal.erinnerung ? "offen" : "gruen";
@@ -469,7 +492,7 @@ var SR = (function(){
       inc._wasReminder = true; return {deal: inc, neu: false};
     }
     // Doppelt gesendeter Fund: fehlende Werte ergänzen, nicht neu zählen
-    ["preis","preisTxt","gewinn","gewinnTxt","defekt","quelle","bild","ende"].forEach(function(k){ e[k] = keep(e[k], inc[k]); });
+    ["preis","preisTxt","gewinn","gewinnTxt","defekt","quelle","bild","ende","kategorie"].forEach(function(k){ e[k] = keep(e[k], inc[k]); });
     if (inc.ende) e.ende = inc.ende;
     return {deal: e, neu: false};
   }
@@ -533,8 +556,111 @@ var SR = (function(){
             ek:ek, roh:roh, anteil:anteil, dein:dein, nachLohn:dein-lohn, proStd:proStd, ampel:ampel};
   }
 
+
+  /* ---------- Kategorien & Filter ---------- */
+  var CAT_LIST = ["Laptop","MacBook","Mini-PC","Grafikkarte","Konsole/Handheld","RAM/SSD","Sonstiges"];
+  var RAM_ACC = /\b(ohne|kein|keine|keinen|keinem)\s+(ram|ssd|rams|ssds)\b|\bohne\s+ram\s*\/\s*ssd\b/i;
+
+  function normKategorie(s){
+    if (s == null || s === "") return null;
+    var x = String(s).trim().toLowerCase().replace(/[–—_]/g,"-").replace(/\s+/g," ");
+    if (/^mac[\s-]?book/.test(x)) return "MacBook";
+    if (/^(laptop|notebook)/.test(x)) return "Laptop";
+    if (/^mini[\s-]?pc/.test(x)) return "Mini-PC";
+    if (/^(grafikkarte|gpu|graphics)/.test(x)) return "Grafikkarte";
+    if (/^(konsole|handheld|spielkonsole)/.test(x)) return "Konsole/Handheld";
+    if (/^(ram|ssd|speicher)/.test(x)) return "RAM/SSD";
+    if (/^sonstig/.test(x)) return "Sonstiges";
+    return null;
+  }
+
+  function autoCategory(text){
+    var s = String(text||"");
+    if (/\bmacbooks?\b/i.test(s)) return "MacBook";
+    if (/\b(laptops?|notebooks?|thinkpad|zbook|precision|latitude|elitebook|nitro|legion|omen)\b/i.test(s)) return "Laptop";
+    if (/\bmini[-\s]?pcs?\b/i.test(s) || /\btiny\b/i.test(s) ||
+        /\b(elitedesk|prodesk)\b[\s\S]{0,40}\bmini\b/i.test(s) ||
+        /\boptiplex\b[\s\S]{0,40}\bmicro\b/i.test(s) ||
+        /\bnuc\d*\b/i.test(s) || /\bminisforum\b/i.test(s) || /\bbeelink\b/i.test(s) ||
+        /\bm[79]\d{2}q\b/i.test(s)) return "Mini-PC";
+    if (/\b(gtx|rtx)\d*\b/i.test(s) || /\b(radeon|quadro|mxm|grafikkarten?|gpus?)\b/i.test(s) || /\brx[\s-]?\d/i.test(s) || /\brx\b/i.test(s)) return "Grafikkarte";
+    if (/\bplay\s*stations?\b/i.test(s) || /\bps[45](pro|slim)?\b/i.test(s) || /\bxbox(es)?\b/i.test(s) ||
+        /\b(nintendo\s+)?switch\b/i.test(s) || /\bsteam\s*deck\b/i.test(s) || /\brog\s*ally\b/i.test(s)) return "Konsole/Handheld";
+    if (/\b(rams?|ssds?)\b/i.test(s)) return "RAM/SSD";
+    return "Sonstiges";
+  }
+
+  function detectCategoryFromParts(geraet, title, body, explicit){
+    var n = normKategorie(explicit);
+    if (n) return n;
+    var name = [geraet, title].filter(Boolean).join(" ");
+    var fromName = autoCategory(name);
+    if (fromName !== "Sonstiges") return fromName;
+    var fromBody = autoCategory(body||"");
+    if (fromBody === "RAM/SSD" && RAM_ACC.test(body||"") && !/\b(rams?|ssds?)\b/i.test(name)) return "Sonstiges";
+    return fromBody;
+  }
+
+  // text = Titel/Gerät/Text; explicit (optional) hat Vorrang, z. B. Feld "Kategorie:"
+  function detectCategory(text, explicit){
+    var n = normKategorie(explicit);
+    if (n) return n;
+    var s = String(text||"");
+    var fromAll = autoCategory(s);
+    if (fromAll === "RAM/SSD" && RAM_ACC.test(s)){
+      // Wenn RAM/SSD nur als „ohne RAM/SSD“ vorkommt und kein anderes Stichwort greift: Sonstiges
+      var stripped = s.replace(RAM_ACC," ");
+      var again = autoCategory(stripped);
+      if (again !== "RAM/SSD") return again;
+    }
+    return fromAll;
+  }
+
+  function categoryOf(deal){
+    if (!deal) return "Sonstiges";
+    if (deal.kategorie && CAT_LIST.indexOf(deal.kategorie) >= 0) return deal.kategorie;
+    return detectCategoryFromParts(deal.geraet, deal.titel||deal.title, deal.text||deal.message||deal.defekt||"", deal.explKat||null);
+  }
+
+  function matchesTab(deal, tab, nowSec){
+    if (!tab || tab === "alle") return true;
+    if (tab === "gruen") return deal.ampel === "gruen";
+    if (tab === "gelb") return deal.ampel === "gelb";
+    if (tab === "ende") return endetBald(deal, nowSec);
+    return true;
+  }
+
+  function matchesKat(deal, kat){
+    if (!kat || kat === "alle") return true;
+    return categoryOf(deal) === kat;
+  }
+
+  function filterDeals(list, tab, kat, nowSec){
+    return (list||[]).filter(function(d){ return matchesTab(d, tab, nowSec) && matchesKat(d, kat); });
+  }
+
+  function tabCounts(list, kat, nowSec){
+    var f = (list||[]).filter(function(d){ return matchesKat(d, kat); });
+    return {
+      alle: f.length,
+      gruen: f.filter(function(d){ return d.ampel === "gruen"; }).length,
+      gelb: f.filter(function(d){ return d.ampel === "gelb"; }).length,
+      ende: f.filter(function(d){ return endetBald(d, nowSec); }).length
+    };
+  }
+
+  function categoryCounts(list, tab, nowSec){
+    var f = (list||[]).filter(function(d){ return matchesTab(d, tab, nowSec); });
+    var c = {};
+    CAT_LIST.forEach(function(k){ c[k] = 0; });
+    f.forEach(function(d){ var k = categoryOf(d); if (c[k] == null) c[k] = 0; c[k]++; });
+    return c;
+  }
+
   return {safeImageUrl:safeImageUrl,dealKey:dealKey,mergeDeal:mergeDeal,eur:eur,eurSigned:eurSigned,toNum:toNum,isTest:isTest,parseMessage:parseMessage,parseData:parseData,parseEnde:parseEnde,isMega:isMega,
-          endetBald:endetBald,berlinParts:berlinParts,nextRound:nextRound,isNight:isNight,calc:calc,pad:pad};
+          endetBald:endetBald,berlinParts:berlinParts,nextRound:nextRound,isNight:isNight,calc:calc,pad:pad,
+          CAT_LIST:CAT_LIST,normKategorie:normKategorie,detectCategory:detectCategory,categoryOf:categoryOf,
+          matchesTab:matchesTab,filterDeals:filterDeals,tabCounts:tabCounts,categoryCounts:categoryCounts};
 })();
 if (typeof module !== "undefined") module.exports = SR;
 </script>
@@ -556,7 +682,7 @@ if (typeof module !== "undefined") module.exports = SR;
   var deals = {};        // Schlüssel (Link bzw. Gerät+Quelle) -> deal
   var ids = new Set();   // bereits verarbeitete ntfy-Nachrichten-IDs
   var seen = new Set(store.get("seen",[]));
-  var firstLoad = true, es = null, pollT = null, wake = null, tab = "gruen";
+  var firstLoad = true, es = null, pollT = null, wake = null, tab = "alle", kat = "";
   var megaQueue = [];
 
   var eur = SR.eur;
@@ -600,13 +726,30 @@ if (typeof module !== "undefined") module.exports = SR;
     document.querySelectorAll("section.view").forEach(function(s){ s.classList.toggle("show", s.id==="v-"+v); });
     window.scrollTo(0,0);
   }
-  function setTab(t){
+  function setTab(t, skipSave){
+    if (["alle","gruen","gelb","ende"].indexOf(t) < 0) t = "alle";
     tab = t;
-    document.querySelectorAll("#tabs button").forEach(function(b){ b.classList.toggle("act", b.dataset.tab===t); });
+    store.set("filterTab", tab);
+    document.querySelectorAll("#tabs button").forEach(function(b){
+      var on = b.dataset.tab===t;
+      b.classList.toggle("act", on);
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
     document.querySelectorAll(".tile").forEach(function(b){ b.classList.toggle("sel", b.dataset.tab===t); });
-    ["gruen","gelb","ende"].forEach(function(c){ $("c-"+c).classList.toggle("show", c===t); });
+    var cols = $("cols");
+    if (cols){
+      cols.classList.toggle("alle", t==="alle");
+      cols.classList.toggle("single", t!=="alle");
+    }
+    ["alle","gruen","gelb","ende"].forEach(function(c){ var el=$("c-"+c); if (el) el.classList.toggle("show", c===t); });
+    if (!skipSave) render();
   }
-  document.querySelectorAll("[data-tab]").forEach(function(b){ b.onclick=function(){ setTab(b.dataset.tab); if (window.innerWidth>=900){ var el=$("c-"+b.dataset.tab); el.scrollIntoView({behavior:"smooth",block:"start"});} }; });
+  function setKat(k, skipSave){
+    kat = (k && k !== kat) ? k : "";
+    store.set("filterKat", kat);
+    if (!skipSave) render();
+  }
+  document.querySelectorAll("[data-tab]").forEach(function(b){ b.onclick=function(){ setTab(b.dataset.tab); if (window.innerWidth>=900 && tab!=="alle"){ var el=$("c-"+tab); if (el) el.scrollIntoView({behavior:"smooth",block:"start"});} }; });
 
   /* ---------- Rendering ---------- */
   function card(d, now){
@@ -615,6 +758,8 @@ if (typeof module !== "undefined") module.exports = SR;
     var img = d.bild ? '<div class="img" data-bg="'+esc(d.bild)+'"></div>' : '<div class="img">'+(mega?"💎":d.ampel==="gelb"?"🟡":d.ampel==="offen"?"⏰":"💚")+'</div>';
     var chips = "";
     if (mega) chips += '<span class="chip mg">💎 Mega-Schatz</span>';
+    var katName = SR.categoryOf(d);
+    if (katName) chips += '<span class="chip kat">'+esc(katName)+'</span>';
     if (d.plattform) chips += '<span class="chip pf">'+esc(d.plattform)+'</span>';
     if (d.abholung) chips += '<span class="chip dp">Dörpen</span>';
     var endTxt = "", bar = "";
@@ -642,26 +787,44 @@ if (typeof module !== "undefined") module.exports = SR;
     var now = nowSec(), today = SR.berlinParts(new Date()).key;
     var all = Object.keys(deals).map(function(k){ return deals[k]; }).filter(function(d){ return now - d.time <= 86400; });
     all.sort(function(a,b){ return b.time - a.time; });
-    var g = all.filter(function(d){ return d.ampel==="gruen"; });
-    var y = all.filter(function(d){ return d.ampel==="gelb"; });
-    var e = all.filter(function(d){ return SR.endetBald(d, now); }).sort(function(a,b){ return (a.ende||1e12)-(b.ende||1e12); });
+    var gAll = all.filter(function(d){ return d.ampel==="gruen"; });
+    var yAll = all.filter(function(d){ return d.ampel==="gelb"; });
+    var eAll = all.filter(function(d){ return SR.endetBald(d, now); }).sort(function(a,b){ return (a.ende||1e12)-(b.ende||1e12); });
     var todays = all.filter(function(d){ return SR.berlinParts(new Date(d.time*1000)).key === today; });
     var sum = todays.reduce(function(s,d){ return s + (d.gewinn>0 && d.ampel==="gruen" ? d.gewinn : 0); },0);
     var sumY = todays.reduce(function(s,d){ return s + (d.gewinn>0 && d.ampel==="gelb" ? d.gewinn : 0); },0);
     $("sum").textContent = eur(sum);
     $("cntToday").textContent = todays.length ? todays.length+" Fund"+(todays.length>1?"e":"")+" heute"+(sumY?" · +"+eur(sumY)+" gelb":"") : "";
-    var megas = g.filter(function(d){ return SR.isMega(d,cfg.mega); }).length;
-    $("nG").textContent = $("tG").textContent = g.length; $("hG").textContent = g.length;
-    $("nY").textContent = $("tY").textContent = y.length; $("hY").textContent = y.length;
-    $("nE").textContent = $("tE").textContent = e.length; $("hE").textContent = e.length;
-    $("sG").textContent = megas ? "💎 "+megas+" Mega" : (g.length ? "↗ "+eur(g.reduce(function(s,d){return s+(d.gewinn||0);},0)) : "–");
-    $("sY").textContent = y.length ? y.length+" Deal(s) prüfen" : "–";
+    var megas = gAll.filter(function(d){ return SR.isMega(d,cfg.mega); }).length;
+    // Kacheln: Gesamtzahlen (unabhängig von der Kategorie)
+    $("nG").textContent = gAll.length; $("nY").textContent = yAll.length; $("nE").textContent = eAll.length;
+    $("sG").textContent = megas ? "💎 "+megas+" Mega" : (gAll.length ? "↗ "+eur(gAll.reduce(function(s,d){return s+(d.gewinn||0);},0)) : "–");
+    $("sY").textContent = yAll.length ? yAll.length+" Deal(s) prüfen" : "–";
     $("sE").textContent = "< 3 Std.";
+    // Tab-Badges und Listen: kombiniert mit gewählter Kategorie
+    var tc = SR.tabCounts(all, kat, now);
+    $("tA").textContent = tc.alle; $("tG").textContent = tc.gruen; $("tY").textContent = tc.gelb; $("tE").textContent = tc.ende;
+    var g = SR.filterDeals(gAll, "alle", kat, now);
+    var y = SR.filterDeals(yAll, "alle", kat, now);
+    var e = SR.filterDeals(eAll, "alle", kat, now);
+    var mixed = SR.filterDeals(all, tab, kat, now);
+    $("hA").textContent = mixed.length; $("hG").textContent = g.length; $("hY").textContent = y.length; $("hE").textContent = e.length;
     var nr = SR.nextRound(new Date());
     var emptyMsg = function(txt){ return '<div class="empty"><span class="big">🔭</span><b>'+txt+'</b><br>Nächste Runde um '+nr.label+' Uhr'+(nr.morgen?' (morgen)':'')+'.</div>'; };
-    $("l-gruen").innerHTML = g.length ? g.map(function(d){return card(d,now);}).join("") : emptyMsg(cfg.topic||DEMO ? "Noch keine Schätze heute" : "Noch kein ntfy-Thema eingetragen – unten auf ⚙️ Einstellungen tippen");
-    $("l-gelb").innerHTML = y.length ? y.map(function(d){return card(d,now);}).join("") : emptyMsg("Gerade nichts zum Prüfen");
-    $("l-ende").innerHTML = e.length ? e.map(function(d){return card(d,now);}).join("") : emptyMsg("Nichts läuft bald ab");
+    var emptyFilter = kat ? "Keine Funde in „"+kat+"“" : (cfg.topic||DEMO ? "Noch keine Schätze heute" : "Noch kein ntfy-Thema eingetragen – unten auf ⚙️ Einstellungen tippen");
+    $("l-alle").innerHTML = mixed.length ? mixed.map(function(d){return card(d,now);}).join("") : emptyMsg(emptyFilter);
+    $("l-gruen").innerHTML = g.length ? g.map(function(d){return card(d,now);}).join("") : emptyMsg(kat ? "Keine grünen Funde in „"+kat+"“" : (cfg.topic||DEMO ? "Noch keine Schätze heute" : "Noch kein ntfy-Thema eingetragen – unten auf ⚙️ Einstellungen tippen"));
+    $("l-gelb").innerHTML = y.length ? y.map(function(d){return card(d,now);}).join("") : emptyMsg(kat ? "Nichts zum Prüfen in „"+kat+"“" : "Gerade nichts zum Prüfen");
+    $("l-ende").innerHTML = e.length ? e.map(function(d){return card(d,now);}).join("") : emptyMsg(kat ? "Nichts läuft bald ab in „"+kat+"“" : "Nichts läuft bald ab");
+    // Kategorie-Chips: nur Kategorien mit mindestens 1 Fund im aktuellen Tab
+    var cc = SR.categoryCounts(all, tab, now);
+    var bar = $("katbar"), chips = "";
+    SR.CAT_LIST.forEach(function(name){
+      if (!cc[name] && kat!==name) return;
+      chips += '<button type="button" class="katchip'+(kat===name?' act':'')+'" data-kat="'+esc(name)+'">'+esc(name)+'<span class="n">'+cc[name]+'</span></button>';
+    });
+    bar.innerHTML = chips;
+    bar.querySelectorAll("[data-kat]").forEach(function(b){ b.onclick = function(){ setKat(b.dataset.kat); }; });
     all.forEach(function(d){ d._neu = false; });
     document.querySelectorAll("[data-bg]").forEach(function(el){ var u = SR.safeImageUrl(el.dataset.bg); if (u) el.style.backgroundImage = 'url("'+u+'")'; });
     document.querySelectorAll("[data-calc]").forEach(function(b){ b.onclick = function(){ toCalc(deals[b.dataset.calc]); }; });
@@ -810,10 +973,16 @@ if (typeof module !== "undefined") module.exports = SR;
       {id:"d1",time:n-1500,title:"🔥💎 MEGA-SCHATZ – ThinkPad T480s i7 16GB 512GB",message:"🟢 **Ampel:** Grün\n💶 **Preis:** 85 € inkl. Versand\n📈 **Gewinn netto:** ca. 125 €\n🔧 **Defekt:** Displayglas gesprungen, sonst ok\n📍 **Quelle:** Kleinanzeigen · Versand",click:"https://www.kleinanzeigen.de"},
       {id:"d2",time:n-900,title:"💎 SCHATZ GEFUNDEN – Lenovo M720q",message:"🟢 **Ampel:** Grün\n💶 **Preis:** 22 € inkl. Versand\n📈 **Gewinn netto:** ca. 45 €\n🔧 **Defekt:** ohne RAM/SSD\n📍 **Quelle:** eBay · Versand",click:"https://www.ebay.de"},
       {id:"d3",time:n-5400,title:"💎 SCHATZ GEFUNDEN – HP EliteDesk 800 G4 Mini",message:"DATA: {\"geraet\":\"HP EliteDesk 800 G4 Mini i5-8500\",\"preis\":30,\"gewinn\":52,\"defekt\":\"Netzteil fehlt\",\"quelle\":\"Kleinanzeigen · Abholung Dörpen\",\"ampel\":\"gruen\"}"},
-      {id:"d4",time:n-3000,title:"🟡 Mal anschauen – Dell OptiPlex 7070 Micro",message:"🟡 **Ampel:** Gelb\n💶 **Preis:** 60 € inkl. Versand\n📈 **Gewinn netto:** ca. 28 €\n🔧 **Defekt:** geht nicht an (ungetestet)\n📍 **Quelle:** Vinted"},
+      {id:"d4",time:n-3000,title:"🟡 GRENZFALL – Dell OptiPlex 7070 Micro",message:"🟡 **Ampel:** Gelb\n💶 **Preis:** 60 € inkl. Versand\n📈 **Gewinn netto:** ca. 28 €\n🔧 **Defekt:** geht nicht an (ungetestet)\n📍 **Quelle:** Vinted"},
       {id:"d5",time:n-7000,title:"⏰ Endet in 40 Min – Nintendo Switch Board",message:"DATA: {\"geraet\":\"Nintendo Switch Mainboard\",\"preis\":35,\"gewinn\":38,\"defekt\":\"Ladechip defekt\",\"quelle\":\"eBay Auktion\",\"ampel\":\"gelb\",\"ende\":\""+new Date((n+2400)*1000).toISOString()+"\"}"},
       {id:"d6",time:n-200,title:"✅ ntfy-Check",message:"Test – wird ausgeblendet"},
-      {id:"d7",time:n-100,title:"⏰ Endet in 50 Min – Lenovo M720q",message:"Erinnerung zum Fund",click:"https://www.ebay.de"}
+      {id:"d7",time:n-100,title:"⏰ Endet in 50 Min – Lenovo M720q",message:"Erinnerung zum Fund",click:"https://www.ebay.de"},
+      {id:"d8",time:n-2200,title:"🟡 NACHFRAGEN – Acer Nitro 5 RTX 3060",message:"🟡 **Ampel:** Gelb\n💶 **Preis:** 235 € inkl. Versand\n📈 **Gewinn netto:** ca. 50 €\n🔧 **Defekt:** Geht an, Display-Riss? Beim Verkäufer nachfragen\n📍 **Quelle:** eBay · Versand"},
+      {id:"d9",time:n-1800,title:"🟡 GRENZFALL – GTX 1080 Ti defekt",message:"🟡 **Ampel:** Gelb\n💶 **Preis:** 72 € inkl. Versand\n📈 **Gewinn netto:** ca. 48 €\n🔧 **Defekt:** kein Bild, Lüfter drehen\n📍 **Quelle:** Kleinanzeigen · Versand"},
+      {id:"d10",time:n-4000,title:"💎 SCHATZ GEFUNDEN – MacBook Air 2017",message:"🟢 **Ampel:** Grün\n💶 **Preis:** 90 € inkl. Versand\n📈 **Gewinn netto:** ca. 70 €\n🔧 **Defekt:** Displayschaden, iCloud frei\n📍 **Quelle:** eBay · Versand"},
+      {id:"d11",time:n-2500,title:"💎 SCHATZ GEFUNDEN – DDR4 RAM + SSD Posten",message:"🟢 **Ampel:** Grün\n💶 **Preis:** 40 € inkl. Versand\n📈 **Gewinn netto:** ca. 65 €\n🔧 **Defekt:** ungetestet, Etikettfotos vorhanden\n📍 **Quelle:** Kleinanzeigen · Versand\n📦 **Kategorie:** RAM/SSD"},
+      {id:"d12",time:n-1200,title:"🟡 NACHFRAGEN – Steam Deck 64GB",message:"🟡 **Ampel:** Gelb\n💶 **Preis:** 120 € inkl. Versand\n📈 **Gewinn netto:** ca. 45 €\n🔧 **Defekt:** lädt nicht, beim Verkäufer nach Netzteil fragen\n📍 **Quelle:** eBay · Versand"},
+      {id:"d13",time:n-6000,title:"💎 SCHATZ GEFUNDEN – Akkuschrauber Bosch",message:"🟢 **Ampel:** Grün\n💶 **Preis:** 15 € (Abholung Dörpen)\n📈 **Gewinn netto:** ca. 30 €\n🔧 **Defekt:** Akku schwach\n📍 **Quelle:** Kleinanzeigen · Abholung Dörpen"}
     ];
     M.forEach(function(m){ m.event="message"; ingest(m); });
     firstLoad = false; setLive(true);
@@ -822,7 +991,9 @@ if (typeof module !== "undefined") module.exports = SR;
   }
 
   /* ---------- Start ---------- */
-  applyTheme(); loadSettings(); loadCalc(); runCalc(); setTab("gruen"); tick(); setInterval(tick, 1000);
+  applyTheme(); loadSettings(); loadCalc(); runCalc();
+  kat = store.get("filterKat",""); if (typeof kat !== "string") kat = "";
+  setTab(store.get("filterTab","alle"), true); tick(); setInterval(tick, 1000);
   if (params.get("theme")) { cfg.theme = params.get("theme"); applyTheme(); }
   if (params.get("view")) showView(params.get("view"));
   if (DEMO) demo(); else { render(); poll(); startSse(); pollT = setInterval(poll, 60000); if (!cfg.topic) showView("set"); }
