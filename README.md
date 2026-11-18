@@ -64,13 +64,13 @@ Text (Markdown erlaubt, Emojis davor egal, eine Angabe pro Zeile):
         🔧 **Defekt:** ohne RAM/SSD
         📍 **Quelle:** Kleinanzeigen · Versand   (erstes Wort vor „·“ = Plattform-Chip)
         ⏳ **Endet:** 18:30 | in 2 Std 15 Min | 2026-11-18T18:30:00+01:00 | 1763486400 (Unix-Sek. oder -ms)   (optional)
-        📦 **Kategorie:** Laptop | MacBook | Mini-PC | Grafikkarte | Konsole/Handheld | RAM/SSD | Sonstiges
+        📦 **Kategorie:** Laptop | MacBook | Mini-PC | Grafikkarte | Konsole/Handheld | Handy | PC-Hardware | RAM/SSD | Sonstiges
                                            (optional, hat Vorrang vor der automatischen Erkennung)
 Header: Click: <Anzeigen-Link>   → Knopf „Öffnen“
         Attach: <Bild-URL>       → Vorschaubild (attachment.url)
 ```
 Zahlen dürfen deutsch geschrieben sein („1.234,50 €“, „ca. 45 €“), auch negativ („-12 €“ → angezeigt als „−12 €“).
-Feldnamen müssen **genau** stimmen: `Preis:` (oder `Preis inkl. Versand:`, `EK:`, `Einkaufspreis:`) und `Gewinn netto:` (oder `Gewinn:`). `Preis neu:` oder `Gewinn brutto:` werden ignoriert. Kommt ein Feld doppelt vor, gilt die erste Zeile. Ohne Feld `Kategorie:` erkennt die App die Kategorie aus Titel und Text (z. B. ThinkPad → Laptop, MacBook bleibt MacBook, M720q/NUC → Mini-PC, GTX/RTX → Grafikkarte).
+Feldnamen müssen **genau** stimmen: `Preis:` (oder `Preis inkl. Versand:`, `EK:`, `Einkaufspreis:`) und `Gewinn netto:` (oder `Gewinn:`). `Preis neu:` oder `Gewinn brutto:` werden ignoriert. Kommt ein Feld doppelt vor, gilt die erste Zeile. Ohne Feld `Kategorie:` erkennt die App die Kategorie aus Titel und Text (z. B. ThinkPad → Laptop, MacBook bleibt MacBook, M720q/NUC → Mini-PC, GTX/RTX → Grafikkarte, iPhone/Galaxy/Pixel → Handy, Ryzen/Mainboard/Gaming-PC → PC-Hardware). Aliase für das Feld: `handy`, `smartphone`, `iphone`, `galaxy`, `pixel`; `pc-hardware`, `cpu`, `prozessor`, `mainboard`, `board`, `gaming-pc`.
 Vorschaubilder werden nur über **https** geladen.
 
 ### Ein Fund pro Anzeige: Erinnerungen und Doppelungen
@@ -95,7 +95,7 @@ DATA: {"geraet":"HP EliteDesk 800 G4 Mini","preis":30,"gewinn":52,"defekt":"Netz
 | `ampel` | `gruen` / `gelb` / `rot` | Status (`rot` wird ausgeblendet) |
 | `ende` | ISO-Zeit, Unix-Sekunden/-Millisekunden (Zahl oder Text), „18:30“ oder „in 40 Min“ | Auktionsende (optional) |
 | `mega` | true/false | Mega-Schatz erzwingen (optional) |
-| `kategorie` | Text | `Laptop`, `MacBook`, `Mini-PC`, `Grafikkarte`, `Konsole/Handheld`, `RAM/SSD` oder `Sonstiges` (optional, hat Vorrang) |
+| `kategorie` | Text | `Laptop`, `MacBook`, `Mini-PC`, `Grafikkarte`, `Konsole/Handheld`, `Handy`, `PC-Hardware`, `RAM/SSD` oder `Sonstiges` (optional, hat Vorrang; Aliase wie `handy`/`iphone` bzw. `cpu`/`mainboard`/`gaming-pc`) |
 | `bild` | https-URL | Vorschaubild (optional, sonst `Attach`) |
 
 Fehlende Felder im DATA-Block werden aus dem Text bzw. Titel ergänzt. Der Block kann auch am Ende einer normalen, schön formatierten Nachricht stehen. In der ntfy-App sieht man ihn dann als letzte Zeile.

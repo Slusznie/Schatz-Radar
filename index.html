@@ -558,8 +558,11 @@ var SR = (function(){
 
 
   /* ---------- Kategorien & Filter ---------- */
-  var CAT_LIST = ["Laptop","MacBook","Mini-PC","Grafikkarte","Konsole/Handheld","RAM/SSD","Sonstiges"];
+  var CAT_LIST = ["Laptop","MacBook","Mini-PC","Grafikkarte","Konsole/Handheld","Handy","PC-Hardware","RAM/SSD","Sonstiges"];
+  var CAT_ICON = {"Laptop":"💻","MacBook":"🍏","Mini-PC":"🖥️","Grafikkarte":"🎞️","Konsole/Handheld":"🎮","Handy":"📱","PC-Hardware":"⚙️","RAM/SSD":"💾","Sonstiges":"📦"};
+  var CAT_TINT = {"Laptop":"#6ea8ff","MacBook":"#f2a3b3","Mini-PC":"#7ad0b0","Grafikkarte":"#c9a3ff","Konsole/Handheld":"#8fd17a","Handy":"#7ec8e3","PC-Hardware":"#e0b36a","RAM/SSD":"#9aa7c2","Sonstiges":"#93a39a"};
   var RAM_ACC = /\b(ohne|kein|keine|keinen|keinem)\s+(ram|ssd|rams|ssds)\b|\bohne\s+ram\s*\/\s*ssd\b/i;
+  var CHIPSET = /\b[abhzqwx](310|320|350|360|365|370|390|399|410|460|470|490|510|520|550|560|570|590|610|620|650|660|670|680|690|760|770|790|810|840|850|860|870|880|890)e?\b/i;
 
   function normKategorie(s){
     if (s == null || s === "") return null;
@@ -569,23 +572,37 @@ var SR = (function(){
     if (/^mini[\s-]?pc/.test(x)) return "Mini-PC";
     if (/^(grafikkarte|gpu|graphics)/.test(x)) return "Grafikkarte";
     if (/^(konsole|handheld|spielkonsole)/.test(x)) return "Konsole/Handheld";
+    if (/^(handy|smartphones?|iphones?|galaxy|pixels?)/.test(x)) return "Handy";
+    if (/^(pc[\s-]?hardware|cpus?|prozessor|mainboards?|boards?|gaming[\s-]?pcs?)/.test(x)) return "PC-Hardware";
     if (/^(ram|ssd|speicher)/.test(x)) return "RAM/SSD";
     if (/^sonstig/.test(x)) return "Sonstiges";
+    if (CAT_LIST.indexOf(String(s).trim()) >= 0) return String(s).trim();
     return null;
   }
 
   function autoCategory(text){
     var s = String(text||"");
     if (/\bmacbooks?\b/i.test(s)) return "MacBook";
-    if (/\b(laptops?|notebooks?|thinkpad|zbook|precision|latitude|elitebook|nitro|legion|omen)\b/i.test(s)) return "Laptop";
+    if (/\b(laptops?|notebooks?|thinkpad|zbook|precision|latitude|elitebook|nitro|legion|omen|galaxy\s*books?|pixelbooks?)\b/i.test(s)) return "Laptop";
     if (/\bmini[-\s]?pcs?\b/i.test(s) || /\btiny\b/i.test(s) ||
         /\b(elitedesk|prodesk)\b[\s\S]{0,40}\bmini\b/i.test(s) ||
         /\boptiplex\b[\s\S]{0,40}\bmicro\b/i.test(s) ||
         /\bnuc\d*\b/i.test(s) || /\bminisforum\b/i.test(s) || /\bbeelink\b/i.test(s) ||
         /\bm[79]\d{2}q\b/i.test(s)) return "Mini-PC";
+    if (/\b(gaming|gamer|komplett)[\s-]?pcs?\b/i.test(s)) return "PC-Hardware";
     if (/\b(gtx|rtx)\d*\b/i.test(s) || /\b(radeon|quadro|mxm|grafikkarten?|gpus?)\b/i.test(s) || /\brx[\s-]?\d/i.test(s) || /\brx\b/i.test(s)) return "Grafikkarte";
+    if (/\biphones?\b/i.test(s) || /\b(smartphones?|handys?)\b/i.test(s) ||
+        (/\bgalaxy\b/i.test(s) && !/\bgalaxy\s*book/i.test(s)) ||
+        (/\bpixels?\b/i.test(s) && !/\bpixelbooks?\b/i.test(s))) return "Handy";
     if (/\bplay\s*stations?\b/i.test(s) || /\bps[45](pro|slim)?\b/i.test(s) || /\bxbox(es)?\b/i.test(s) ||
         /\b(nintendo\s+)?switch\b/i.test(s) || /\bsteam\s*deck\b/i.test(s) || /\brog\s*ally\b/i.test(s)) return "Konsole/Handheld";
+    if (/\bryzen\b/i.test(s) || /\b\d{4}x3d\b/i.test(s) ||
+        /\b(intel\s+)?(core\s+)?i[3579]([\s-]?\d{3,5}[a-z]{0,3})?\b/i.test(s) ||
+        /\b(cpus?|prozessor(en)?|processors?)\b/i.test(s) ||
+        /\b(mainboards?|motherboards?)\b/i.test(s) ||
+        /\b(am[45]|lga[\s-]?(1151|1200|1700|1851))\b/i.test(s) ||
+        /\bpc[\s-]?hardware\b/i.test(s) ||
+        CHIPSET.test(s)) return "PC-Hardware";
     if (/\b(rams?|ssds?)\b/i.test(s)) return "RAM/SSD";
     return "Sonstiges";
   }
@@ -659,7 +676,7 @@ var SR = (function(){
 
   return {safeImageUrl:safeImageUrl,dealKey:dealKey,mergeDeal:mergeDeal,eur:eur,eurSigned:eurSigned,toNum:toNum,isTest:isTest,parseMessage:parseMessage,parseData:parseData,parseEnde:parseEnde,isMega:isMega,
           endetBald:endetBald,berlinParts:berlinParts,nextRound:nextRound,isNight:isNight,calc:calc,pad:pad,
-          CAT_LIST:CAT_LIST,normKategorie:normKategorie,detectCategory:detectCategory,categoryOf:categoryOf,
+          CAT_LIST:CAT_LIST,CAT_ICON:CAT_ICON,CAT_TINT:CAT_TINT,normKategorie:normKategorie,detectCategory:detectCategory,categoryOf:categoryOf,
           matchesTab:matchesTab,filterDeals:filterDeals,tabCounts:tabCounts,categoryCounts:categoryCounts};
 })();
 if (typeof module !== "undefined") module.exports = SR;
@@ -759,7 +776,9 @@ if (typeof module !== "undefined") module.exports = SR;
     var chips = "";
     if (mega) chips += '<span class="chip mg">💎 Mega-Schatz</span>';
     var katName = SR.categoryOf(d);
-    if (katName) chips += '<span class="chip kat">'+esc(katName)+'</span>';
+    var katIcon = SR.CAT_ICON[katName] || "";
+    var katTint = SR.CAT_TINT[katName] || "";
+    if (katName) chips += '<span class="chip kat"'+(katTint?' style="color:'+katTint+';border-color:'+katTint+'44"':'')+'>'+(katIcon?esc(katIcon)+' ':'')+esc(katName)+'</span>';
     if (d.plattform) chips += '<span class="chip pf">'+esc(d.plattform)+'</span>';
     if (d.abholung) chips += '<span class="chip dp">Dörpen</span>';
     var endTxt = "", bar = "";
@@ -821,7 +840,8 @@ if (typeof module !== "undefined") module.exports = SR;
     var bar = $("katbar"), chips = "";
     SR.CAT_LIST.forEach(function(name){
       if (!cc[name] && kat!==name) return;
-      chips += '<button type="button" class="katchip'+(kat===name?' act':'')+'" data-kat="'+esc(name)+'">'+esc(name)+'<span class="n">'+cc[name]+'</span></button>';
+      var ic = SR.CAT_ICON[name] || "";
+      chips += '<button type="button" class="katchip'+(kat===name?' act':'')+'" data-kat="'+esc(name)+'">'+(ic?esc(ic)+' ':'')+esc(name)+'<span class="n">'+cc[name]+'</span></button>';
     });
     bar.innerHTML = chips;
     bar.querySelectorAll("[data-kat]").forEach(function(b){ b.onclick = function(){ setKat(b.dataset.kat); }; });
