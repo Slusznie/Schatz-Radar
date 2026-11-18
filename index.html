@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1512">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Schatz-Radar</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#0f1512; --bg2:#151d19; --card:#1b2520; --card2:#222e28; --line:#2c3a33;
+  --text:#eef3ef; --muted:#93a39a; --green:#2fd27a; --green-d:#1c8f50; --yellow:#f3c33c;
+  --orange:#e8873a; --red:#ef5a5a; --accent:#c98a2b; --accent-bg:rgba(201,138,43,.16);
+  --shadow:0 6px 24px rgba(0,0,0,.35); --r:20px;
+}
+html.light{
+  --bg:#f3efe7; --bg2:#ebe5da; --card:#fffdf9; --card2:#f7f2ea; --line:#e3dacb;
+  --text:#1d1f1c; --muted:#7a776f; --green:#1f8a4c; --green-d:#16683a; --yellow:#c99300;
+  --orange:#c46a1b; --red:#c93b3b; --accent:#9a5b12; --accent-bg:rgba(201,138,43,.15);
+  --shadow:0 6px 22px rgba(80,60,30,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Nunito",sans-serif;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;padding:env(safe-area-inset-top) 0 90px;transition:filter .8s, background .3s}
+body.night .wrap,body.night nav.bottom{filter:brightness(.42) saturate(.8);transition:filter .8s}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+.wrap{max-width:1500px;margin:0 auto;padding:16px 18px}
+/* Kopf */
+header.top{display:flex;align-items:center;gap:12px;padding:6px 0 10px}
+.brand{flex:1;min-width:0}
+.brand h1{font-size:1.35rem;font-weight:800;letter-spacing:.2px}
+.brand .clock{color:var(--muted);font-size:.95rem;font-variant-numeric:tabular-nums}
+.iconbtn{width:46px;height:46px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;font-size:1.25rem;box-shadow:var(--shadow);transition:transform .15s}
+.iconbtn:active{transform:scale(.92)}
+.iconbtn.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 12px;font-size:.78rem;font-weight:800;letter-spacing:.6px;background:var(--accent-bg);color:var(--accent);border:1px solid rgba(201,138,43,.4);white-space:nowrap}
+.badge .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 var(--green);animation:live 2s infinite}
+.badge.off{color:var(--red);border-color:rgba(239,90,90,.45);background:rgba(239,90,90,.12)}
+.badge.off .dot{background:var(--red);animation:none}
+.badge.demo{color:#7aa7ff;border-color:rgba(122,167,255,.5);background:rgba(122,167,255,.12)}
+@keyframes live{0%{box-shadow:0 0 0 0 rgba(47,210,122,.6)}70%{box-shadow:0 0 0 9px rgba(47,210,122,0)}100%{box-shadow:0 0 0 0 rgba(47,210,122,0)}}
+/* Hero */
+.hero{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:20px 22px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(47,210,122,.18),transparent 70%);pointer-events:none}
+.hero .lbl{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:.8rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.sum{display:flex;align-items:baseline;gap:12px;margin:6px 0 4px;flex-wrap:wrap}
+.sum b{font-size:clamp(3rem,9vw,5.6rem);font-weight:800;color:var(--green);line-height:1;letter-spacing:-2px;font-variant-numeric:tabular-nums}
+.sum span{color:var(--muted);font-size:.95rem}
+.next{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:.95rem;margin-top:4px}
+.next .cd{font-variant-numeric:tabular-nums;font-weight:800;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:3px 10px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.tile{background:var(--card2);border:1px solid var(--line);border-radius:18px;padding:12px 14px;text-align:left;transition:transform .15s,border-color .2s}
+.tile:active{transform:scale(.97)}
+.tile .t{font-size:.85rem;color:var(--muted);font-weight:600}
+.tile .n{font-size:2rem;font-weight:800;margin:2px 0;font-variant-numeric:tabular-nums}
+.tile .s{font-size:.8rem;font-weight:700}
+.tile.g{border-left:5px solid var(--green)} .tile.g .s{color:var(--green)}
+.tile.y{border-left:5px solid var(--yellow)} .tile.y .s{color:var(--yellow)}
+.tile.e{border-left:5px solid var(--orange)} .tile.e .s{color:var(--orange)}
+.tile.sel{border-color:var(--accent)}
+/* Tabs */
+.tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px;margin:18px 0 14px}
+.tabs button{flex:1;border-radius:999px;padding:10px 6px;font-weight:700;color:var(--muted);font-size:.95rem;transition:background .2s,color .2s}
+.tabs button.act{background:var(--card2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.cols{display:block}
+.col h2{display:none}
+.col{display:none}
+.col.show{display:block}
+.list{display:flex;flex-direction:column;gap:12px}
+/* Karten */
+.deal{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.deal.gelb{border-left:5px solid var(--yellow)}
+.deal.offen{border-left:5px solid var(--orange)}
+.deal.offen .gw{color:var(--orange)}
+.deal.offen .amp{background:var(--orange)}
+.deal.gruen{border-left:5px solid var(--green)}
+.deal.mega{border:2px solid var(--accent);border-left:6px solid var(--accent)}
+.deal .img{width:84px;height:84px;border-radius:14px;background:var(--card2) center/cover no-repeat;display:grid;place-items:center;font-size:2rem}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:5px}
+.chip{font-size:.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--card2);border:1px solid var(--line);color:var(--muted)}
+.chip.pf{background:var(--accent-bg);color:var(--accent);border-color:rgba(201,138,43,.35)}
+.chip.dp{background:rgba(232,135,58,.15);color:var(--orange);border-color:rgba(232,135,58,.35)}
+.chip.mg{background:linear-gradient(90deg,#f6c453,#e8873a);color:#2a1700;border:0}
+.chip.end{background:rgba(239,90,90,.14);color:var(--red);border-color:rgba(239,90,90,.35)}
+.deal h3{font-size:1.08rem;font-weight:800;line-height:1.25}
+.deal .def{color:var(--muted);font-size:.88rem;margin-top:4px;line-height:1.3}
+.deal .meta{color:var(--muted);font-size:.78rem;margin-top:6px}
+.deal .right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:96px}
+.deal .gw{font-size:1.55rem;font-weight:800;color:var(--green);white-space:nowrap;font-variant-numeric:tabular-nums}
+.deal.gelb .gw{color:var(--yellow)}
+.deal .ek{font-size:.85rem;color:var(--muted);white-space:nowrap}
+.deal .amp{width:12px;height:12px;border-radius:50%;background:var(--green)}
+.deal.gelb .amp{background:var(--yellow)}
+.deal .acts{display:flex;gap:6px;margin-top:auto}
+.btn{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-weight:700;font-size:.85rem;display:inline-flex;gap:6px;align-items:center;text-decoration:none;color:var(--text)}
+.btn.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
+.bar{grid-column:1/-1;height:6px;border-radius:9px;background:var(--card2);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--orange))}
+.deal.neu{animation:slidein .7s cubic-bezier(.2,.9,.3,1.2) both, glow 1.6s ease-in-out .7s 4}
+.deal.frisch{box-shadow:0 0 0 2px rgba(47,210,122,.35),0 0 22px rgba(47,210,122,.25)}
+.deal.gelb.frisch{box-shadow:0 0 0 2px rgba(243,195,60,.35),0 0 22px rgba(243,195,60,.22)}
+@keyframes slidein{from{opacity:0;transform:translateY(-40px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes glow{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 3px rgba(47,210,122,.55),0 0 34px rgba(47,210,122,.5)}}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:var(--r);padding:28px 18px;text-align:center;color:var(--muted);line-height:1.5}
+.empty .big{font-size:2.4rem;display:block;margin-bottom:6px}
+.empty b{color:var(--text)}
+/* Unten-Navigation */
+nav.bottom{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;gap:4px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));z-index:20}
+nav.bottom button{flex:0 1 180px;border-radius:14px;padding:8px;color:var(--muted);font-weight:700;font-size:.85rem;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav.bottom button .i{font-size:1.35rem}
+nav.bottom button.act{color:var(--accent);background:var(--accent-bg)}
+section.view{display:none}
+section.view.show{display:block;animation:fade .3s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+/* Rechner & Einstellungen */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+.panel h2{font-size:1.3rem;font-weight:800;margin-bottom:4px}
+.panel p.sub{color:var(--muted);font-size:.9rem;margin-bottom:12px;line-height:1.4}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.82rem;color:var(--muted);font-weight:600}
+label.f input,label.f select{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:1.05rem;color:var(--text);width:100%}
+label.chk{display:flex;gap:10px;align-items:center;font-size:.95rem;padding:10px 0}
+label.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.res{border-radius:22px;padding:18px;background:var(--card2);border:1px solid var(--line);margin-top:6px}
+.res .lbl{color:var(--muted);font-size:.78rem;font-weight:800;letter-spacing:.8px;text-transform:uppercase}
+.res .max{font-size:clamp(2.6rem,8vw,4.4rem);font-weight:800;color:var(--green);letter-spacing:-1.5px;line-height:1.05;font-variant-numeric:tabular-nums}
+.res.rot .max{color:var(--red)} .res.gelb .max{color:var(--yellow)}
+.ampel{display:inline-flex;gap:8px;align-items:center;font-weight:800;padding:6px 12px;border-radius:999px;margin:8px 0}
+.ampel.gruen{background:rgba(47,210,122,.15);color:var(--green)}
+.ampel.gelb{background:rgba(243,195,60,.15);color:var(--yellow)}
+.ampel.rot{background:rgba(239,90,90,.15);color:var(--red)}
+.rows{margin-top:10px;font-size:.9rem;border-top:1px solid var(--line)}
+.rows div{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.rows div span:first-child{color:var(--muted)}
+.rows div.tot{font-weight:800}
+.note{font-size:.82rem;color:var(--muted);line-height:1.45;margin-top:10px}
+.calcgrid{display:grid;gap:14px}
+/* Mega Vollbild */
+#mega{position:fixed;inset:0;z-index:100;display:none;place-items:center;background:radial-gradient(circle at 50% 40%,rgba(246,196,83,.35),rgba(10,8,2,.94) 65%);color:#fff;text-align:center;padding:24px;filter:none}
+#mega.show{display:grid;animation:fade .3s}
+#mega .gem{font-size:7rem;animation:gem 1.2s ease-in-out infinite;display:block}
+#mega h2{font-size:clamp(2rem,6vw,3.6rem);font-weight:900;letter-spacing:1px;background:linear-gradient(90deg,#ffe28a,#f6a83c,#ffe28a);-webkit-background-clip:text;background-clip:text;color:transparent}
+#mega .g{font-size:clamp(3rem,10vw,6rem);font-weight:900;color:#5cf59b;margin:8px 0}
+#mega .d{font-size:1.3rem;opacity:.9}
+#mega small{display:block;margin-top:18px;opacity:.6}
+@keyframes gem{0%,100%{transform:scale(1) rotate(-6deg)}50%{transform:scale(1.18) rotate(6deg);filter:drop-shadow(0 0 30px #ffd76a)}}
+#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;opacity:0;transition:.3s;z-index:50;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%)}
+/* Querformat */
+@media (min-width:900px){
+  .wrap{padding:20px 28px}
+  .heroRow{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;align-items:stretch}
+  .tiles{margin-top:0;grid-template-columns:1fr;grid-template-rows:repeat(3,1fr)}
+  .tile{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .tile .n{order:2;font-size:2.2rem}
+  .tabs{display:none}
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+  .col{display:block}
+  .col h2{display:flex;justify-content:space-between;align-items:center;font-size:1rem;font-weight:800;margin-bottom:10px;padding:0 4px}
+  .col h2 .c{color:var(--muted)}
+  .deal{grid-template-columns:auto 1fr auto}
+  .deal .img{width:72px;height:72px}
+  .calcgrid{grid-template-columns:1fr 1fr;align-items:start}
+  .calcgrid .res{position:sticky;top:16px}
+  .wideonly{display:inline}
+}
+@media (min-width:1200px){.deal .img{width:84px;height:84px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><h1>Schatz-Radar</h1><div class="clock" id="clock">--:-- Uhr</div></div>
+    <span class="badge" id="live"><span class="dot"></span><span id="liveTxt">LIVE DÖRPEN</span></span>
+    <button class="iconbtn" id="wakeBtn" title="Bildschirm wach halten" aria-label="Bildschirm wach halten">⚡</button>
+    <button class="iconbtn" id="themeBtn" title="Hell/Dunkel" aria-label="Hell oder Dunkel">🌙</button>
+  </header>
+
+  <!-- RADAR -->
+  <section class="view show" id="v-radar">
+    <div class="heroRow">
+      <div class="hero">
+        <div class="lbl"><span>Möglicher Gewinn heute</span><span id="cntToday"></span></div>
+        <div class="sum"><b id="sum">0 €</b><span>netto, kalkuliert</span></div>
+        <div class="next">⏱ Nächste Suchrunde <span class="cd" id="nextAt">--:--</span> in <span class="cd" id="nextCd">--:--:--</span></div>
+      </div>
+      <div class="tiles">
+        <button class="tile g" data-tab="gruen"><div><div class="t">Grün (Sofort)</div><div class="s" id="sG">–</div></div><div class="n" id="nG">0</div></button>
+        <button class="tile y" data-tab="gelb"><div><div class="t">Gelb (Prüfen)</div><div class="s" id="sY">–</div></div><div class="n" id="nY">0</div></button>
+        <button class="tile e" data-tab="ende"><div><div class="t">Endet bald</div><div class="s" id="sE">&lt; 3 Std.</div></div><div class="n" id="nE">0</div></button>
+      </div>
+    </div>
+    <div class="tabs" id="tabs">
+      <button data-tab="gruen" class="act">Grün (<span id="tG">0</span>)</button>
+      <button data-tab="gelb">Gelb (<span id="tY">0</span>)</button>
+      <button data-tab="ende">Endet bald (<span id="tE">0</span>)</button>
+    </div>
+    <div class="cols">
+      <div class="col show" id="c-gruen"><h2>🟢 Grün · Sofort <span class="c" id="hG"></span></h2><div class="list" id="l-gruen"></div></div>
+      <div class="col" id="c-gelb"><h2>🟡 Gelb · Prüfen <span class="c" id="hY"></span></h2><div class="list" id="l-gelb"></div></div>
+      <div class="col" id="c-ende"><h2>⏰ Endet bald <span class="c" id="hE"></span></h2><div class="list" id="l-ende"></div></div>
+    </div>
+  </section>
+
+  <!-- RECHNER -->
+  <section class="view" id="v-calc">
+    <div class="calcgrid">
+      <div class="panel">
+        <h2>🧮 Max-Preis-Rechner</h2>
+        <p class="sub">Was darf ich höchstens zahlen? Alle Werte in Euro. Standardwerte sind Vorschläge, du kannst sie ändern – sie werden gespeichert.</p>
+        <label class="f" style="margin-bottom:10px">Gerät / Teil (optional)<input id="k_name" type="text" placeholder="z. B. Lenovo M720q ohne RAM/SSD"></label>
+        <div class="grid2">
+          <label class="f">Verkaufswert repariert (€)<input id="k_vk" type="number" inputmode="decimal" min="0" step="1" value="220"></label>
+          <label class="f">Teilewert / Ausschlachten (€)<input id="k_tw" type="number" inputmode="decimal" min="0" step="1" value="60"></label>
+        </div>
+        <label class="chk"><input type="checkbox" id="k_unklar"> Defekt unklar („geht nicht an“, „ungetestet“) – Risiko 60 % Reparatur / 40 % Teilewert</label>
+        <div class="grid2">
+          <label class="f">Gebühren (%)<input id="k_geb" type="number" inputmode="decimal" min="0" max="50" step="0.5" value="13"></label>
+          <label class="f">Ersatzteile (€)<input id="k_et" type="number" inputmode="decimal" min="0" step="1" value="30"></label>
+          <label class="f">Versand rein (€)<input id="k_vr" type="number" inputmode="decimal" min="0" step="0.5" value="6"></label>
+          <label class="f">Versand raus (€)<input id="k_vo" type="number" inputmode="decimal" min="0" step="0.5" value="6"></label>
+          <label class="f">Arbeitszeit (Std.)<input id="k_h" type="number" inputmode="decimal" min="0" step="0.25" value="1.5"></label>
+          <label class="f">Stundensatz (€/Std.)<input id="k_sl" type="number" inputmode="decimal" min="0" step="1" value="15"></label>
+          <label class="f">Kollegenanteil (% vom Gewinn)<input id="k_ka" type="number" inputmode="decimal" min="0" max="90" step="1" value="25"></label>
+          <label class="f">Wunschgewinn für dich (€)<input id="k_wg" type="number" inputmode="decimal" min="0" step="1" value="40"></label>
+        </div>
+        <label class="f" style="margin-top:10px">Angebotspreis inkl. Versand (€, optional – zum Prüfen eines Fundes)<input id="k_ek" type="number" inputmode="decimal" min="0" step="0.5" placeholder="leer = mit Max-Preis rechnen"></label>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="k_reset">↺ Standardwerte</button></div>
+      </div>
+      <div class="res" id="k_res">
+        <div class="lbl">Max-Einkaufspreis inkl. Versand</div>
+        <div class="max" id="k_max">–</div>
+        <div class="ampel gruen" id="k_amp">● –</div>
+        <div class="rows" id="k_rows"></div>
+        <p class="note">Ampel nach deinem Gewinn pro Stunde (nach Kollegenanteil): <b>grün ≥ 20 €/Std.</b>, gelb 10–20 €/Std., <b>rot &lt; 10 €/Std.</b> oder wenn der Max-Preis bei 0 € liegt. Der Teilewert ist die Untergrenze für den erwarteten Verkaufswert.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- EINSTELLUNGEN -->
+  <section class="view" id="v-set">
+    <div class="panel">
+      <h2>⚙️ Einstellungen</h2>
+      <p class="sub">Das ntfy-Thema wird nur auf diesem Gerät gespeichert, nicht in der App-Datei. Wer das Thema kennt, kann mitlesen – nicht weitergeben.</p>
+      <label class="f">ntfy-Thema (oder kompletter Link)<input id="s_topic" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="z. B. schatz-xxxxxxxx"></label>
+      <label class="f" style="margin-top:10px">ntfy-Server<input id="s_server" type="url" autocomplete="off" value="https://ntfy.sh"></label>
+      <label class="chk"><input type="checkbox" id="s_sse" checked> Live-Stream (neue Funde sofort, zusätzlich zur Abfrage alle 60 s)</label>
+      <label class="chk"><input type="checkbox" id="s_anim" checked> Animationen</label>
+      <label class="chk"><input type="checkbox" id="s_night" checked> Nachtmodus 23–6 Uhr (gedimmt, nur Mega-Schätze leuchten)</label>
+      <label class="chk"><input type="checkbox" id="s_vib" checked> Vibrieren bei neuem Schatz (falls das Tablet es kann)</label>
+      <label class="f" style="margin-top:6px">Mega-Schatz ab Gewinn (€)<input id="s_mega" type="number" min="0" step="5" value="100"></label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+        <button class="btn pri" id="s_save">💾 Speichern &amp; verbinden</button>
+        <button class="btn" id="s_test">🔌 Verbindung testen</button>
+      </div>
+      <p class="note" id="s_status"></p>
+    </div>
+    <div class="panel">
+      <h2>ℹ️ So kommen Funde rein</h2>
+      <p class="sub">Die App liest die Nachrichten der letzten 24 Std. aus dem ntfy-Thema (ntfy.sh hebt sie ca. 12 Std. auf) und blendet Testnachrichten aus. Titel „💎 SCHATZ GEFUNDEN – Gerät“ = grün, „🔥💎 MEGA-SCHATZ“ = Mega, „🟡“ = gelb, „⏰“ = endet bald. Das genaue Format steht in der README.</p>
+    </div>
+  </section>
+</div>
+
+<nav class="bottom">
+  <button data-view="radar" class="act"><span class="i">📡</span>Radar</button>
+  <button data-view="calc"><span class="i">🧮</span>Rechner</button>
+  <button data-view="set"><span class="i">⚙️</span>Einstellungen</button>
+</nav>
+
+<div id="mega" role="dialog" aria-live="assertive"><div><span class="gem">💎</span><h2>MEGA-SCHATZ!</h2><div class="g" id="megaG">+0 €</div><div class="d" id="megaD"></div><small>Tippen zum Schließen</small></div></div>
+<div id="toast"></div>
+
+<!-- Kern: reine Logik ohne DOM (wird auch in Node getestet) -->
+<script id="core">
+var SR = (function(){
+  "use strict";
+  var TZ = "Europe/Berlin";
+  var ROUNDS = [[8,13],[13,13],[18,13],[22,13]];
+
+  function toNum(s){
+    if (s == null) return null;
+    if (typeof s === "number") return isFinite(s) ? s : null;
+    var m = String(s).replace(/\s/g,"").match(/-?\d{1,3}(?:\.\d{3})+(?:,\d+)?|-?\d+(?:[.,]\d+)?/);
+    if (!m) return null;
+    var t = m[0];
+    if (/\.\d{3}/.test(t) && !/\.\d{1,2}$/.test(t.replace(/,\d+$/,""))) t = t.replace(/\./g,"");
+    t = t.replace(",",".");
+    var n = parseFloat(t);
+    return isFinite(n) ? n : null;
+  }
+
+  function isTest(msg){
+    var t = (msg.title||""), b = (msg.message||"");
+    // nur ganze Wörter (Bindestrich gehört zum Wort): "getestet", "Kabeltester", "LAN-Kabeltester" bleiben echte Funde
+    var W = "(^|[^0-9A-Za-zÄÖÜäöüß\\-])(%s)(?=$|[^0-9A-Za-zÄÖÜäöüß\\-])";
+    var reTitle = new RegExp(W.replace("%s","test|check|ntfy-check|design-muster|schatz-test|team-test|testfund|testnachricht"), "i");
+    var reBody  = new RegExp(W.replace("%s","design-muster|testfund|testnachricht"), "i");
+    if (reTitle.test(t)) return true;
+    if (/kein echter fund/i.test(b) || reBody.test(b)) return true;
+    return false;
+  }
+
+  function cleanLine(l){
+    return l.replace(/\*\*/g,"").replace(/__/g,"").replace(/^[\s>*\-•·]+/,"").trim();
+  }
+
+  // Liest "Schlüssel: Wert"-Zeilen (Emojis/Markdown davor egal)
+  function fields(text){
+    var out = {};
+    String(text||"").split(/\r?\n/).forEach(function(raw){
+      var l = cleanLine(raw);
+      var m = l.match(/^[^\wÄÖÜäöü]*([A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß .\-\/]{1,30}?)\s*:\s*(.+)$/);
+      if (m){ var k = m[1].toLowerCase().replace(/\s+/g," ").trim(); if (!(k in out)) out[k] = m[2].trim(); }
+    });
+    return out;
+  }
+  function pick(f, keys){
+    // exakter Feldname: "Preis:" trifft, "Preis neu:" nicht
+    for (var i=0;i<keys.length;i++){ if (Object.prototype.hasOwnProperty.call(f, keys[i])) return f[keys[i]]; }
+    return null;
+  }
+
+  function parseData(text){
+    var lines = String(text||"").split(/\r?\n/);
+    for (var i=0;i<lines.length;i++){
+      var l = lines[i].replace(/^[\s`]+/,"");
+      if (l.indexOf("DATA:")===0){
+        var js = l.slice(5).trim();
+        // JSON darf auch über mehrere Zeilen gehen
+        for (var j=i+1; j<=lines.length; j++){
+          try { return JSON.parse(js.replace(/`+$/,"")); } catch(e){}
+          if (j<lines.length) js += "\n" + lines[j];
+        }
+        return null;
+      }
+    }
+    return null;
+  }
+
+  function normAmpel(a){
+    a = String(a||"").toLowerCase();
+    if (/gelb|yellow|🟡/.test(a)) return "gelb";
+    if (/rot|red|🔴/.test(a)) return "rot";
+    if (/grün|gruen|green|🟢/.test(a)) return "gruen";
+    return null;
+  }
+
+  // Endzeit: ISO, Unix-Sekunden, "HH:MM" (heute/morgen), "in 30 Min", "in 2 Std"
+  function parseEnde(v, refSec){
+    if (v == null || v === "") return null;
+    if (typeof v === "number") return v > 1e12 ? Math.round(v/1000) : v;
+    var s = String(v).trim();
+    var m;
+    if (/^\d{9,13}$/.test(s)){ var u = +s; return u > 1e12 ? Math.round(u/1000) : u; } // Unix-Sekunden oder -Millisekunden
+    var hm = s.match(/(\d+(?:[.,]\d+)?)\s*(std|stunde|h\b)/i), mm = s.match(/(\d+)\s*(min|minute)/i);
+    if (hm || mm) return refSec + (hm ? Math.round(parseFloat(hm[1].replace(",","."))*3600) : 0) + (mm ? (+mm[1])*60 : 0);
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)){ var d = Date.parse(s); return isNaN(d)?null:Math.round(d/1000); }
+    if ((m = s.match(/(\d{1,2}):(\d{2})/) || s.match(/(\d{1,2})\.(\d{2})\s*uhr/i))){
+      var p = berlinParts(new Date(refSec*1000));
+      var nowMin = p.h*60+p.mi, tgt = (+m[1])*60+(+m[2]);
+      var diff = tgt - nowMin; if (/morgen/i.test(s) || diff < -60) diff += 1440;
+      return refSec - p.s + diff*60;
+    }
+    return null;
+  }
+
+  function platform(q){
+    if (!q) return "";
+    var s = String(q).split(/[·|,;\-–(]/)[0].trim();
+    return s.length > 22 ? s.slice(0,22) : s;
+  }
+
+  var PREIS_KEYS = ["preis","preis inkl. versand","ek","einkauf","einkaufspreis"];
+  var GEWINN_KEYS = ["gewinn netto","gewinn","netto-gewinn","nettogewinn","profit"];
+
+  function parseMessage(msg){
+    if (!msg || (msg.event && msg.event !== "message")) return null;
+    if (isTest(msg)) return null;
+    var title = msg.title || "", body = msg.message || "";
+    var tags = msg.tags || [];
+    var d = parseData(body);
+    var f = fields(body);
+    var looksLikeFind = /schatz|💎|🟡|⏰|mal anschauen|endet/i.test(title) || d ||
+                        (pick(f,PREIS_KEYS) && pick(f,GEWINN_KEYS));
+    if (!looksLikeFind) return null;
+    var tm = title.match(/\s[–—-]\s+(.+)$/) || title.match(/:\s+(.+)$/);
+    var tGeraet = tm ? tm[1].trim() : "";
+    var deal = {
+      id: msg.id || String(msg.time)+title,
+      time: msg.time || Math.round(Date.now()/1000),
+      geraet: tGeraet || pick(f,["gerät","geraet","artikel"]) || "Fund",
+      preisTxt: pick(f,PREIS_KEYS),
+      gewinnTxt: pick(f,GEWINN_KEYS),
+      defekt: pick(f,["defekt","zustand","fehler"]),
+      quelle: pick(f,["quelle","plattform"]),
+      link: msg.click || null,
+      bild: (msg.attachment && msg.attachment.url && (!msg.attachment.type || /^image\//.test(msg.attachment.type))) ? msg.attachment.url : null,
+      ampel: null, endeTxt: pick(f,["endet","ende","läuft ab","laeuft ab","auktionsende"]),
+      titelEnde: (/⏰|endet/i.test(title) ? title.split(/\s[–—-]\s/)[0] : null),
+      mega: /mega-?schatz/i.test(title) || /🔥/.test(title),
+      erinnerung: /⏰|^\s*erinnerung/i.test(title),
+      viaData: !!d
+    };
+    if (!deal.link && msg.actions){ for (var i=0;i<msg.actions.length;i++){ var a=msg.actions[i]; if (a.action==="view" && /anzeige|öffnen|link/i.test(a.label||"")){ deal.link=a.url; break; } } }
+    deal.ampel = normAmpel(pick(f,["ampel","status"])) || (/🟡/.test(title) ? "gelb" : null) || (/🔴/.test(title) ? "rot" : null) ||
+                 (tags.indexOf("red_circle")>=0 ? "rot" : null) || (tags.indexOf("yellow_circle")>=0 ? "gelb" : null) ||
+                 (tags.indexOf("green_circle")>=0 ? "gruen" : null);
+    if (d && typeof d === "object"){
+      if (d.geraet) deal.geraet = String(d.geraet);
+      if (d.preis != null) deal.preisTxt = String(d.preis);
+      if (d.gewinn != null) deal.gewinnTxt = String(d.gewinn);
+      if (d.defekt != null) deal.defekt = String(d.defekt);
+      if (d.quelle != null) deal.quelle = String(d.quelle);
+      if (d.link) deal.link = String(d.link);
+      if (d.bild) deal.bild = String(d.bild);
+      if (d.ampel) deal.ampel = normAmpel(d.ampel) || deal.ampel;
+      if (d.ende != null) deal.endeTxt = d.ende;
+      if (d.mega != null) deal.mega = !!d.mega;
+    }
+    if (deal.link && !/^https?:\/\//i.test(deal.link)) deal.link = null;
+    deal.bild = safeImageUrl(deal.bild);
+    deal.preis = toNum(deal.preisTxt);
+    deal.gewinn = toNum(deal.gewinnTxt);
+    deal.ende = parseEnde(deal.endeTxt, deal.time) || parseEnde(deal.titelEnde, deal.time);
+    deal.abholung = /abhol|dörpen|doerpen/i.test((deal.preisTxt||"")+" "+(deal.quelle||""));
+    deal.plattform = platform(deal.quelle);
+    if (deal.ampel === "rot") return null; // rote Funde gehören nicht aufs Radar
+    // Erinnerung ohne Ampel: nicht automatisch grün (zählt nicht in "Gewinn heute", nur "Endet bald")
+    if (!deal.ampel) deal.ampel = deal.erinnerung ? "offen" : "gruen";
+    if (deal.erinnerung){ deal.mega = false; if (!deal.ende) deal.endetBaldFlag = true; }
+    deal.key = dealKey(deal);
+    return deal;
+  }
+
+  // Nur https-Bilder; Zeichen, die aus url("...") ausbrechen könnten, werden kodiert
+  function safeImageUrl(u){
+    if (!u) return null;
+    try { var x = new URL(String(u)); if (x.protocol !== "https:") return null;
+      return x.href.replace(/["'()\\\s<>]/g, function(c){ return "%"+c.charCodeAt(0).toString(16).toUpperCase().padStart(2,"0"); });
+    } catch(e){ return null; }
+  }
+
+  // Schlüssel zum Zusammenführen: Link (ohne #, ohne / am Ende), sonst Gerät+Quelle
+  function dealKey(d){
+    if (d.link) return "L:" + String(d.link).replace(/#.*$/,"").replace(/\/+$/,"").toLowerCase();
+    return "G:" + String(d.geraet||"").toLowerCase().replace(/\s+/g," ").trim() + "|" + String(d.quelle||"").toLowerCase().replace(/\s+/g," ").trim();
+  }
+
+  // Neue Nachricht in bestehenden Fund einarbeiten. Ergebnis: {deal, neu:boolean}
+  function mergeDeal(existing, inc){
+    if (!existing) return {deal: inc, neu: true};
+    var e = existing, keep = function(a,b){ return (a==null || a==="") ? b : a; };
+    if (inc.erinnerung && !e.erinnerung){
+      // Erinnerung zum bekannten Fund: nur Endzeit/Endet-bald übernehmen
+      if (inc.ende) e.ende = inc.ende;
+      if (inc.endetBaldFlag){ e.endetBaldFlag = true; e.erinnertAm = inc.time; }
+      return {deal: e, neu: false};
+    }
+    if (!inc.erinnerung && e.erinnerung){
+      // Original kommt nach der Erinnerung: Original übernimmt, Endzeit bleibt
+      inc.ende = inc.ende || e.ende; inc.endetBaldFlag = inc.endetBaldFlag || e.endetBaldFlag; inc.erinnertAm = e.erinnertAm || e.time;
+      inc._wasReminder = true; return {deal: inc, neu: false};
+    }
+    // Doppelt gesendeter Fund: fehlende Werte ergänzen, nicht neu zählen
+    ["preis","preisTxt","gewinn","gewinnTxt","defekt","quelle","bild","ende"].forEach(function(k){ e[k] = keep(e[k], inc[k]); });
+    if (inc.ende) e.ende = inc.ende;
+    return {deal: e, neu: false};
+  }
+
+  function eur(n, dec){
+    if (n == null || isNaN(n)) return "–";
+    var s = Math.abs(n).toLocaleString("de-DE",{minimumFractionDigits:dec||0,maximumFractionDigits:dec||0})+" €";
+    return (n < 0 && Math.abs(n) >= Math.pow(10,-(dec||0))/2 ? "−" : "") + s;
+  }
+  function eurSigned(n, dec){
+    if (n == null || isNaN(n)) return "–";
+    var s = eur(n, dec);
+    return s.charAt(0) === "−" || /^0(,0+)? €$/.test(s) ? s : "+" + s;
+  }
+
+  function isMega(deal, limit){ if (deal.erinnerung) return false; return !!deal.mega || (deal.gewinn != null && deal.gewinn > (limit==null?100:limit)); }
+
+  function endetBald(deal, nowSec){
+    if (deal.ende) return deal.ende > nowSec && deal.ende - nowSec <= 3*3600;
+    return !!deal.endetBaldFlag && nowSec - (deal.erinnertAm || deal.time) < 3600;
+  }
+
+  function berlinParts(date){
+    var f = new Intl.DateTimeFormat("de-DE",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"});
+    var o = {}; f.formatToParts(date).forEach(function(p){ o[p.type]=p.value; });
+    return {y:+o.year,mo:+o.month,d:+o.day,h:+o.hour%24,mi:+o.minute,s:+o.second,key:o.year+"-"+o.month+"-"+o.day};
+  }
+
+  function nextRound(date){
+    var p = berlinParts(date), now = p.h*3600+p.mi*60+p.s;
+    for (var i=0;i<ROUNDS.length;i++){
+      var t = ROUNDS[i][0]*3600+ROUNDS[i][1]*60;
+      if (t > now) return {label: pad(ROUNDS[i][0])+":"+pad(ROUNDS[i][1]), inSec: t-now};
+    }
+    var t0 = ROUNDS[0][0]*3600+ROUNDS[0][1]*60;
+    return {label: pad(ROUNDS[0][0])+":"+pad(ROUNDS[0][1]), inSec: 86400-now+t0, morgen:true};
+  }
+  function pad(n){ return (n<10?"0":"")+n; }
+
+  function isNight(date){ var h = berlinParts(date).h; return h >= 23 || h < 6; }
+
+  // Max-Preis-Rechner
+  function calc(i){
+    var g = (i.gebuehr||0)/100, k = Math.min(Math.max((i.kollege||0)/100,0),0.95);
+    var vk = i.verkauf||0, tw = i.teilewert||0;
+    var erwartet = i.unklar ? 0.6*vk + 0.4*tw : vk;
+    if (tw > 0) erwartet = Math.max(erwartet, tw);
+    var erloes = erwartet*(1-g) - (i.versandRaus||0);
+    var direkt = (i.versandRein||0) + (i.ersatzteile||0);
+    var lohn = (i.stunden||0)*(i.stundensatz||0);
+    var maxEk = erloes - direkt - ((i.wunsch||0) + lohn)/(1-k);
+    var ek = (i.angebot != null && i.angebot !== "" && !isNaN(i.angebot)) ? +i.angebot : Math.max(maxEk,0);
+    var roh = erloes - direkt - ek;
+    var anteil = roh > 0 ? roh*k : 0;
+    var dein = roh - anteil;
+    var proStd = (i.stunden||0) > 0 ? dein/(i.stunden) : null; // 0 Std. → kein Stundenwert
+    var ampel = proStd != null ? (proStd >= 20 ? "gruen" : (proStd < 10 ? "rot" : "gelb"))
+                               : (dein >= (i.wunsch||0) && dein > 0 ? "gruen" : (dein > 0 ? "gelb" : "rot"));
+    if (maxEk <= 0 && (i.angebot == null || i.angebot === "")) ampel = "rot";
+    return {erwartet:erwartet, gebuehren:erwartet*g, erloes:erloes, direkt:direkt, lohn:lohn, maxEk:maxEk,
+            ek:ek, roh:roh, anteil:anteil, dein:dein, nachLohn:dein-lohn, proStd:proStd, ampel:ampel};
+  }
+
+  return {safeImageUrl:safeImageUrl,dealKey:dealKey,mergeDeal:mergeDeal,eur:eur,eurSigned:eurSigned,toNum:toNum,isTest:isTest,parseMessage:parseMessage,parseData:parseData,parseEnde:parseEnde,isMega:isMega,
+          endetBald:endetBald,berlinParts:berlinParts,nextRound:nextRound,isNight:isNight,calc:calc,pad:pad};
+})();
+if (typeof module !== "undefined") module.exports = SR;
+</script>
+
+<!-- Oberfläche -->
+<script>
+(function(){
+  "use strict";
+  if (typeof document === "undefined") return;
+  var $ = function(id){ return document.getElementById(id); };
+  var LS = window.localStorage;
+  var params = new URLSearchParams(location.search);
+  var DEMO = params.get("demo") === "1";
+  var store = {
+    get: function(k,d){ try{ var v = LS.getItem("sr_"+k); return v===null?d:JSON.parse(v);}catch(e){return d;} },
+    set: function(k,v){ try{ LS.setItem("sr_"+k, JSON.stringify(v)); }catch(e){} }
+  };
+  var cfg = Object.assign({topic:"",server:"https://ntfy.sh",sse:true,anim:true,night:true,vib:true,mega:100,theme:"dark"}, store.get("cfg",{}));
+  var deals = {};        // Schlüssel (Link bzw. Gerät+Quelle) -> deal
+  var ids = new Set();   // bereits verarbeitete ntfy-Nachrichten-IDs
+  var seen = new Set(store.get("seen",[]));
+  var firstLoad = true, es = null, pollT = null, wake = null, tab = "gruen";
+  var megaQueue = [];
+
+  var eur = SR.eur;
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+  function toast(t){ var e=$("toast"); e.textContent=t; e.classList.add("show"); clearTimeout(e._t); e._t=setTimeout(function(){e.classList.remove("show");},2600); }
+  function nowSec(){ return Math.round(Date.now()/1000); }
+  function cleanTopic(t){
+    t = String(t||"").trim();
+    var m = t.match(/ntfy\.[^\/]+\/([A-Za-z0-9_\-]{1,64})/); if (m) t = m[1];
+    return /^[A-Za-z0-9_\-]{1,64}$/.test(t) ? t : "";
+  }
+  function server(){ var s = String(cfg.server||"https://ntfy.sh").trim().replace(/\/+$/,""); return /^https?:\/\//.test(s)?s:"https://ntfy.sh"; }
+
+  /* ---------- Theme / Nacht ---------- */
+  function applyTheme(){ document.documentElement.classList.toggle("light", cfg.theme==="light"); $("themeBtn").textContent = cfg.theme==="light"?"☀️":"🌙";
+    document.querySelector('meta[name="theme-color"]').content = cfg.theme==="light"?"#f3efe7":"#0f1512"; }
+  $("themeBtn").onclick = function(){ cfg.theme = cfg.theme==="light"?"dark":"light"; store.set("cfg",cfg); applyTheme(); };
+
+  /* ---------- Wake Lock ---------- */
+  function setWakeUi(){ $("wakeBtn").classList.toggle("on", !!wake); }
+  async function requestWake(){
+    try { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", function(){ wake=null; setWakeUi(); }); setWakeUi(); return true; }
+    catch(e){ wake=null; setWakeUi(); return false; }
+  }
+  $("wakeBtn").onclick = async function(){
+    if (!("wakeLock" in navigator)){ toast("Wach halten geht hier nicht (braucht https). Bitte Bildschirm-Timeout am Tablet hochsetzen."); return; }
+    if (wake){ store.set("wake",false); try{ await wake.release(); }catch(e){} wake=null; setWakeUi(); toast("Bildschirm darf wieder ausgehen"); return; }
+    store.set("wake",true);
+    toast(await requestWake() ? "⚡ Bildschirm bleibt an" : "Wach halten blockiert – Bildschirm-Timeout hochsetzen");
+  };
+  document.addEventListener("visibilitychange", function(){
+    if (document.visibilityState==="visible"){ if (store.get("wake",false) && !wake && "wakeLock" in navigator) requestWake(); poll(); }
+  });
+
+  /* ---------- Navigation ---------- */
+  document.querySelectorAll("nav.bottom button").forEach(function(b){
+    b.onclick = function(){ showView(b.dataset.view); };
+  });
+  function showView(v){
+    document.querySelectorAll("nav.bottom button").forEach(function(x){ x.classList.toggle("act", x.dataset.view===v); });
+    document.querySelectorAll("section.view").forEach(function(s){ s.classList.toggle("show", s.id==="v-"+v); });
+    window.scrollTo(0,0);
+  }
+  function setTab(t){
+    tab = t;
+    document.querySelectorAll("#tabs button").forEach(function(b){ b.classList.toggle("act", b.dataset.tab===t); });
+    document.querySelectorAll(".tile").forEach(function(b){ b.classList.toggle("sel", b.dataset.tab===t); });
+    ["gruen","gelb","ende"].forEach(function(c){ $("c-"+c).classList.toggle("show", c===t); });
+  }
+  document.querySelectorAll("[data-tab]").forEach(function(b){ b.onclick=function(){ setTab(b.dataset.tab); if (window.innerWidth>=900){ var el=$("c-"+b.dataset.tab); el.scrollIntoView({behavior:"smooth",block:"start"});} }; });
+
+  /* ---------- Rendering ---------- */
+  function card(d, now){
+    var mega = SR.isMega(d, cfg.mega), fresh = now - d.time < 600;
+    var cls = "deal "+d.ampel+(d.erinnerung?" erinnerung":"")+(mega?" mega":"")+(d._neu && cfg.anim?" neu":"")+(fresh && cfg.anim?" frisch":"");
+    var img = d.bild ? '<div class="img" data-bg="'+esc(d.bild)+'"></div>' : '<div class="img">'+(mega?"💎":d.ampel==="gelb"?"🟡":d.ampel==="offen"?"⏰":"💚")+'</div>';
+    var chips = "";
+    if (mega) chips += '<span class="chip mg">💎 Mega-Schatz</span>';
+    if (d.plattform) chips += '<span class="chip pf">'+esc(d.plattform)+'</span>';
+    if (d.abholung) chips += '<span class="chip dp">Dörpen</span>';
+    var endTxt = "", bar = "";
+    if (d.ende){
+      var rest = d.ende - now;
+      if (rest > 0){
+        var h = Math.floor(rest/3600), m = Math.floor(rest%3600/60);
+        endTxt = "endet in "+(h? h+" Std. ":"")+m+" Min.";
+        if (rest <= 3*3600){ chips += '<span class="chip end">⏰ '+esc(endTxt)+'</span>'; bar = '<div class="bar"><i style="width:'+Math.max(4,Math.min(100,100-rest/108))+'%"></i></div>'; }
+      } else endTxt = "beendet";
+    }
+    var t = new Date(d.time*1000).toLocaleTimeString("de-DE",{timeZone:"Europe/Berlin",hour:"2-digit",minute:"2-digit"});
+    var gw = d.gewinn!=null ? SR.eurSigned(d.gewinn) : "Gewinn ?";
+    var ek = d.preis!=null ? "EK: "+eur(d.preis, d.preis%1?2:0) : (d.preisTxt?esc(d.preisTxt):"EK: ?");
+    return '<article class="'+cls+'" data-id="'+esc(d.id)+'">'+img+
+      '<div><div class="chips">'+chips+'</div><h3>'+esc(d.geraet)+'</h3>'+
+      (d.defekt?'<div class="def">🔧 '+esc(d.defekt)+'</div>':'')+
+      '<div class="meta">gefunden '+t+' Uhr'+(d.quelle?' · '+esc(d.quelle):'')+(endTxt&&!bar?' · '+esc(endTxt):'')+'</div></div>'+
+      '<div class="right"><span class="amp"></span><div class="gw">'+(mega?'💎 ':'')+gw+'</div><div class="ek">'+ek+'</div>'+
+      '<div class="acts">'+(d.link?'<a class="btn pri" href="'+esc(d.link)+'" target="_blank" rel="noopener noreferrer">🔗 Öffnen</a>':'')+
+      '<button class="btn" data-calc="'+esc(d.key)+'" title="Im Rechner prüfen">🧮</button></div></div>'+bar+'</article>';
+  }
+
+  function render(){
+    var now = nowSec(), today = SR.berlinParts(new Date()).key;
+    var all = Object.keys(deals).map(function(k){ return deals[k]; }).filter(function(d){ return now - d.time <= 86400; });
+    all.sort(function(a,b){ return b.time - a.time; });
+    var g = all.filter(function(d){ return d.ampel==="gruen"; });
+    var y = all.filter(function(d){ return d.ampel==="gelb"; });
+    var e = all.filter(function(d){ return SR.endetBald(d, now); }).sort(function(a,b){ return (a.ende||1e12)-(b.ende||1e12); });
+    var todays = all.filter(function(d){ return SR.berlinParts(new Date(d.time*1000)).key === today; });
+    var sum = todays.reduce(function(s,d){ return s + (d.gewinn>0 && d.ampel==="gruen" ? d.gewinn : 0); },0);
+    var sumY = todays.reduce(function(s,d){ return s + (d.gewinn>0 && d.ampel==="gelb" ? d.gewinn : 0); },0);
+    $("sum").textContent = eur(sum);
+    $("cntToday").textContent = todays.length ? todays.length+" Fund"+(todays.length>1?"e":"")+" heute"+(sumY?" · +"+eur(sumY)+" gelb":"") : "";
+    var megas = g.filter(function(d){ return SR.isMega(d,cfg.mega); }).length;
+    $("nG").textContent = $("tG").textContent = g.length; $("hG").textContent = g.length;
+    $("nY").textContent = $("tY").textContent = y.length; $("hY").textContent = y.length;
+    $("nE").textContent = $("tE").textContent = e.length; $("hE").textContent = e.length;
+    $("sG").textContent = megas ? "💎 "+megas+" Mega" : (g.length ? "↗ "+eur(g.reduce(function(s,d){return s+(d.gewinn||0);},0)) : "–");
+    $("sY").textContent = y.length ? y.length+" Deal(s) prüfen" : "–";
+    $("sE").textContent = "< 3 Std.";
+    var nr = SR.nextRound(new Date());
+    var emptyMsg = function(txt){ return '<div class="empty"><span class="big">🔭</span><b>'+txt+'</b><br>Nächste Runde um '+nr.label+' Uhr'+(nr.morgen?' (morgen)':'')+'.</div>'; };
+    $("l-gruen").innerHTML = g.length ? g.map(function(d){return card(d,now);}).join("") : emptyMsg(cfg.topic||DEMO ? "Noch keine Schätze heute" : "Noch kein ntfy-Thema eingetragen – unten auf ⚙️ Einstellungen tippen");
+    $("l-gelb").innerHTML = y.length ? y.map(function(d){return card(d,now);}).join("") : emptyMsg("Gerade nichts zum Prüfen");
+    $("l-ende").innerHTML = e.length ? e.map(function(d){return card(d,now);}).join("") : emptyMsg("Nichts läuft bald ab");
+    all.forEach(function(d){ d._neu = false; });
+    document.querySelectorAll("[data-bg]").forEach(function(el){ var u = SR.safeImageUrl(el.dataset.bg); if (u) el.style.backgroundImage = 'url("'+u+'")'; });
+    document.querySelectorAll("[data-calc]").forEach(function(b){ b.onclick = function(){ toCalc(deals[b.dataset.calc]); }; });
+  }
+
+  /* ---------- Daten ---------- */
+  function ingest(msg, live){
+    var d = SR.parseMessage(msg);
+    if (!d || ids.has(d.id)) return null;
+    ids.add(d.id);
+    var r = SR.mergeDeal(deals[d.key], d);
+    deals[d.key] = r.deal;
+    var isNew = r.neu && !seen.has(d.id) && !d.erinnerung;
+    seen.add(d.id);
+    if (!r.neu) return r.deal;           // Erinnerung/Doppelung: kein neues Einfahren, kein Vollbild
+    if (isNew && !firstLoad) d._neu = true;
+    if (isNew && !firstLoad){
+      if (cfg.vib && navigator.vibrate) navigator.vibrate(SR.isMega(d,cfg.mega)?[300,120,300,120,600]:[200]);
+      if (SR.isMega(d,cfg.mega)) megaQueue.push(d);
+    }
+    return d;
+  }
+  function saveSeen(){ var a = Array.from(seen); store.set("seen", a.slice(-400)); }
+  function setLive(ok, txt){
+    var b = $("live"); b.classList.toggle("off", !ok); b.classList.toggle("demo", DEMO);
+    $("liveTxt").textContent = DEMO ? "DEMO-DATEN" : (txt || (ok ? "LIVE DÖRPEN" : "OFFLINE"));
+  }
+
+  async function poll(){
+    if (DEMO) return;
+    var topic = cleanTopic(cfg.topic);
+    if (!topic){ setLive(false,"KEIN THEMA"); render(); return; }
+    try {
+      var r = await fetch(server()+"/"+encodeURIComponent(topic)+"/json?poll=1&since=24h", {cache:"no-store"});
+      if (!r.ok) throw new Error("HTTP "+r.status);
+      var txt = await r.text(), n = 0;
+      txt.split("\n").forEach(function(l){ if (!l.trim()) return; try { if (ingest(JSON.parse(l))) n++; } catch(e){} });
+      setLive(true); saveSeen();
+    } catch(e){ setLive(false); }
+    firstLoad = false; render(); showMega();
+  }
+
+  function startSse(){
+    if (es){ es.close(); es = null; }
+    if (DEMO || !cfg.sse || !("EventSource" in window)) return;
+    var topic = cleanTopic(cfg.topic); if (!topic) return;
+    es = new EventSource(server()+"/"+encodeURIComponent(topic)+"/sse");
+    es.onmessage = function(ev){
+      try { var m = JSON.parse(ev.data); if (m.event && m.event!=="message") return;
+        if (ingest(m, true)){ saveSeen(); render(); showMega(); } } catch(e){}
+    };
+    es.onopen = function(){ setLive(true); };
+  }
+
+  function showMega(){
+    if (!megaQueue.length || !cfg.anim) { megaQueue = []; return; }
+    var d = megaQueue.shift();
+    $("megaG").textContent = SR.eurSigned(d.gewinn);
+    $("megaD").textContent = d.geraet + (d.preis!=null?" · EK "+eur(d.preis):"");
+    $("mega").classList.add("show");
+    clearTimeout(showMega._t); showMega._t = setTimeout(closeMega, 7000);
+  }
+  function closeMega(){ $("mega").classList.remove("show"); setTimeout(showMega, 400); }
+  $("mega").onclick = closeMega;
+
+  /* ---------- Uhr / Countdown / Nacht ---------- */
+  function tick(){
+    var now = new Date();
+    $("clock").textContent = now.toLocaleTimeString("de-DE",{timeZone:"Europe/Berlin",hour:"2-digit",minute:"2-digit"})+" Uhr · "+now.toLocaleDateString("de-DE",{timeZone:"Europe/Berlin",weekday:"short",day:"2-digit",month:"2-digit"});
+    var nr = SR.nextRound(now), s = nr.inSec;
+    $("nextAt").textContent = nr.label;
+    $("nextCd").textContent = SR.pad(Math.floor(s/3600))+":"+SR.pad(Math.floor(s%3600/60))+":"+SR.pad(s%60);
+    document.body.classList.toggle("night", cfg.night && SR.isNight(now));
+    if (now.getSeconds()===0) render();
+  }
+
+  /* ---------- Rechner ---------- */
+  var K = ["vk","tw","geb","et","vr","vo","h","sl","ka","wg"];
+  var KDEF = {vk:220,tw:60,geb:13,et:30,vr:6,vo:6,h:1.5,sl:15,ka:25,wg:40};
+  function loadCalc(){ var c = store.get("calc",{}); K.forEach(function(k){ if (c[k]!=null) $("k_"+k).value = c[k]; }); $("k_unklar").checked = !!c.unklar; }
+  function num(id){ var v = $(id).value; return v===""?0:parseFloat(String(v).replace(",",".")); }
+  function runCalc(){
+    var c = {}; K.forEach(function(k){ c[k] = $("k_"+k).value; }); c.unklar = $("k_unklar").checked; store.set("calc", c);
+    var ang = $("k_ek").value;
+    var r = SR.calc({verkauf:num("k_vk"),teilewert:num("k_tw"),unklar:$("k_unklar").checked,gebuehr:num("k_geb"),ersatzteile:num("k_et"),
+      versandRein:num("k_vr"),versandRaus:num("k_vo"),stunden:num("k_h"),stundensatz:num("k_sl"),kollege:num("k_ka"),wunsch:num("k_wg"),
+      angebot: ang===""?null:parseFloat(ang.replace(",","."))});
+    $("k_max").textContent = r.maxEk > 0 ? eur(r.maxEk,2) : "0 € – Finger weg";
+    $("k_res").className = "res "+(r.maxEk<=0?"rot":"");
+    var at = {gruen:"🟢 Grün",gelb:"🟡 Gelb",rot:"🔴 Rot"}[r.ampel];
+    $("k_amp").className = "ampel "+r.ampel; $("k_amp").textContent = at+" · "+(r.proStd==null?"– €/Std. (Ampel nach Gewinn)":eur(r.proStd,2)+"/Std.")+(ang===""?" (bei Max-Preis)":" (bei "+eur(parseFloat(ang.replace(",",".")),2)+")");
+    var rows = [
+      ["Erwarteter Verkaufswert"+($("k_unklar").checked?" (60/40)":""), eur(r.erwartet,2)],
+      ["− Gebühren "+num("k_geb")+" %", eur(-r.gebuehren,2)],
+      ["− Versand raus", eur(-num("k_vo"),2)],
+      ["− Versand rein + Ersatzteile", eur(-r.direkt,2)],
+      ["Einkaufspreis gerechnet", eur(-r.ek,2)],
+      ["= Rohgewinn", eur(r.roh,2), 1],
+      ["− Kollegenanteil "+num("k_ka")+" %", eur(-r.anteil,2)],
+      ["= Dein Gewinn", eur(r.dein,2), 1],
+      ["Arbeitszeit "+num("k_h")+" Std. × "+eur(num("k_sl"))+" (eingerechnet)", eur(r.lohn,2)],
+      ["Gewinn pro Stunde", r.proStd==null ? "–" : eur(r.proStd,2)+"/Std.", 1]
+    ];
+    $("k_rows").innerHTML = rows.map(function(x){ return '<div'+(x[2]?' class="tot"':'')+'><span>'+esc(x[0])+'</span><span>'+esc(x[1])+'</span></div>'; }).join("");
+  }
+  K.concat(["unklar","ek"]).forEach(function(k){ $("k_"+k).addEventListener("input", runCalc); });
+  $("k_reset").onclick = function(){ K.forEach(function(k){ $("k_"+k).value = KDEF[k]; }); $("k_unklar").checked=false; $("k_ek").value=""; $("k_name").value=""; runCalc(); };
+  function toCalc(d){
+    if (!d) return;
+    $("k_name").value = d.geraet; $("k_ek").value = d.preis!=null ? d.preis : "";
+    $("k_unklar").checked = /geht nicht an|ungetestet|unklar|unbekannt|kein bild/i.test(d.defekt||"");
+    runCalc(); showView("calc");
+  }
+
+  /* ---------- Einstellungen ---------- */
+  function loadSettings(){
+    $("s_topic").value = cfg.topic||""; $("s_server").value = cfg.server||"https://ntfy.sh";
+    $("s_sse").checked = cfg.sse; $("s_anim").checked = cfg.anim; $("s_night").checked = cfg.night; $("s_vib").checked = cfg.vib; $("s_mega").value = cfg.mega;
+  }
+  $("s_save").onclick = function(){
+    var t = cleanTopic($("s_topic").value);
+    if ($("s_topic").value.trim() && !t){ $("s_status").textContent = "⚠️ Thema ungültig – nur Buchstaben, Ziffern, - und _."; return; }
+    cfg.topic = t; cfg.server = $("s_server").value.trim() || "https://ntfy.sh"; cfg.sse = $("s_sse").checked; cfg.anim = $("s_anim").checked;
+    cfg.night = $("s_night").checked; cfg.vib = $("s_vib").checked; cfg.mega = parseFloat($("s_mega").value)||100;
+    store.set("cfg", cfg); $("s_topic").value = t;
+    deals = {}; ids = new Set(); firstLoad = true; poll(); startSse();
+    $("s_status").textContent = t ? "✅ Gespeichert. Verbinde mit "+server()+" …" : "Thema geleert.";
+    toast("Gespeichert");
+  };
+  $("s_test").onclick = async function(){
+    var t = cleanTopic($("s_topic").value); if (!t){ $("s_status").textContent = "⚠️ Erst ein Thema eintragen."; return; }
+    $("s_status").textContent = "Teste …";
+    try {
+      var r = await fetch(($("s_server").value.trim()||"https://ntfy.sh").replace(/\/+$/,"")+"/"+t+"/json?poll=1&since=24h",{cache:"no-store"});
+      var lines = (await r.text()).split("\n").filter(function(l){return l.trim();});
+      var msgs = lines.map(function(l){ try{return JSON.parse(l);}catch(e){return null;} }).filter(Boolean);
+      var finds = msgs.filter(function(m){ return SR.parseMessage(m); }).length;
+      $("s_status").textContent = "✅ Verbunden (HTTP "+r.status+"): "+msgs.length+" Nachricht(en) in 24 Std., davon "+finds+" echte Funde ("+(msgs.length-finds)+" Test/sonstige ausgeblendet).";
+    } catch(e){ $("s_status").textContent = "❌ Keine Verbindung: "+e.message+" – Internet prüfen."; }
+  };
+
+  /* ---------- Demo (nur mit ?demo=1, für Screenshots) ---------- */
+  function demo(){
+    var n = nowSec();
+    var M = [
+      {id:"d1",time:n-1500,title:"🔥💎 MEGA-SCHATZ – ThinkPad T480s i7 16GB 512GB",message:"🟢 **Ampel:** Grün\n💶 **Preis:** 85 € inkl. Versand\n📈 **Gewinn netto:** ca. 125 €\n🔧 **Defekt:** Displayglas gesprungen, sonst ok\n📍 **Quelle:** Kleinanzeigen · Versand",click:"https://www.kleinanzeigen.de"},
+      {id:"d2",time:n-900,title:"💎 SCHATZ GEFUNDEN – Lenovo M720q",message:"🟢 **Ampel:** Grün\n💶 **Preis:** 22 € inkl. Versand\n📈 **Gewinn netto:** ca. 45 €\n🔧 **Defekt:** ohne RAM/SSD\n📍 **Quelle:** eBay · Versand",click:"https://www.ebay.de"},
+      {id:"d3",time:n-5400,title:"💎 SCHATZ GEFUNDEN – HP EliteDesk 800 G4 Mini",message:"DATA: {\"geraet\":\"HP EliteDesk 800 G4 Mini i5-8500\",\"preis\":30,\"gewinn\":52,\"defekt\":\"Netzteil fehlt\",\"quelle\":\"Kleinanzeigen · Abholung Dörpen\",\"ampel\":\"gruen\"}"},
+      {id:"d4",time:n-3000,title:"🟡 Mal anschauen – Dell OptiPlex 7070 Micro",message:"🟡 **Ampel:** Gelb\n💶 **Preis:** 60 € inkl. Versand\n📈 **Gewinn netto:** ca. 28 €\n🔧 **Defekt:** geht nicht an (ungetestet)\n📍 **Quelle:** Vinted"},
+      {id:"d5",time:n-7000,title:"⏰ Endet in 40 Min – Nintendo Switch Board",message:"DATA: {\"geraet\":\"Nintendo Switch Mainboard\",\"preis\":35,\"gewinn\":38,\"defekt\":\"Ladechip defekt\",\"quelle\":\"eBay Auktion\",\"ampel\":\"gelb\",\"ende\":\""+new Date((n+2400)*1000).toISOString()+"\"}"},
+      {id:"d6",time:n-200,title:"✅ ntfy-Check",message:"Test – wird ausgeblendet"},
+      {id:"d7",time:n-100,title:"⏰ Endet in 50 Min – Lenovo M720q",message:"Erinnerung zum Fund",click:"https://www.ebay.de"}
+    ];
+    M.forEach(function(m){ m.event="message"; ingest(m); });
+    firstLoad = false; setLive(true);
+    Object.keys(deals).forEach(function(k){ if (deals[k].id==="d2") deals[k]._neu = true; });
+    render();
+  }
+
+  /* ---------- Start ---------- */
+  applyTheme(); loadSettings(); loadCalc(); runCalc(); setTab("gruen"); tick(); setInterval(tick, 1000);
+  if (params.get("theme")) { cfg.theme = params.get("theme"); applyTheme(); }
+  if (params.get("view")) showView(params.get("view"));
+  if (DEMO) demo(); else { render(); poll(); startSse(); pollT = setInterval(poll, 60000); if (!cfg.topic) showView("set"); }
+  if (store.get("wake",false) && "wakeLock" in navigator) requestWake();
+  if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register("sw.js").catch(function(){});
+})();
+</script>
+</body>
+</html>
