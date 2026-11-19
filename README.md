@@ -41,14 +41,19 @@ erwartet  = Verkaufswert repariert                          (Defekt klar)
 Erlös     = erwartet × (1 − Gebühren 13 %) − Versand raus
 direkt    = Versand rein + Ersatzteile
 Lohn      = Stunden × Stundensatz (Std. 15 €)
-Max-EK    = Erlös − direkt − (Wunschgewinn 40 € + Lohn) / (1 − Kollegenanteil 25 %)
+Schwelle  = 60 € (Fundtyp „Schatz“, Standard) oder 40 € (Fundtyp „Mini-PC-Flip“)
+Ziel      = max(Wunschgewinn, Schwelle)   (Wunschgewinn springt beim Wechsel des Fundtyps auf die Schwelle)
+Max-EK    = Erlös − direkt − (Ziel + Lohn) / (1 − Kollegenanteil 25 %)
 
 Rohgewinn = Erlös − direkt − EK          (EK = Angebotspreis oder Max-EK)
 Dein Gew. = Rohgewinn × (1 − Kollegenanteil)
-€/Std.    = Dein Gewinn / Stunden  →  Ampel: grün ≥ 20, gelb 10–20, rot < 10 (oder Max-EK ≤ 0)
-Bei 0 Stunden: €/Std. = „–“, Ampel nur nach Gewinn: grün ≥ Wunschgewinn, gelb > 0, rot ≤ 0
+Ampel (ab v7, nach Netto = Dein Gewinn):
+  GRÜN  = Netto ≥ Schwelle  UND  Verkaufswert ist VERKAUFT
+  GELB  = Netto > 0, aber unter der Schwelle  ODER  Netto ≥ Schwelle, Wert aber nur ASK / SCHÄTZUNG
+  ROT   = Netto ≤ 0  ODER  Max-EK ≤ 0 (ohne Angebotspreis)
+€/Std.    = Dein Gewinn / Stunden   → nur noch Info, bestimmt die Farbe nicht mehr
 ```
-Beim Max-EK bleiben dir nach Kollegenanteil also genau der Wunschgewinn plus dein Stundenlohn. Alle Standardwerte lassen sich ändern und werden gespeichert.
+Beim Max-EK bleiben dir nach Kollegenanteil also mindestens die Schwelle plus dein Stundenlohn. Im Rechner wählst du **Fundtyp** (Schatz ≥ 60 € / Mini-PC-Flip ≥ 40 €) und **„Verkaufswert ist …“** (VERKAUFT / ASK / SCHÄTZUNG, Standard SCHÄTZUNG). Grün gibt es nur mit einem VERKAUFT-Wert (echte verkaufte Preise, z. B. eBay-Verkauft-Median). Übernimmst du einen Fund mit Label in den Rechner, wird das Label mit übernommen. Alle Standardwerte lassen sich ändern und werden gespeichert.
 
 ## Nachrichtenformat (für Maier / die Such-Bots)
 
@@ -66,6 +71,8 @@ Text (Markdown erlaubt, Emojis davor egal, eine Angabe pro Zeile):
         🔧 **Defekt:** ohne RAM/SSD
         📍 **Quelle:** Kleinanzeigen · Versand   (erstes Wort vor „·“ = Plattform-Chip)
         ⏳ **Endet:** 18:30 | in 2 Std 15 Min | 2026-11-18T18:30:00+01:00 | 1763486400 (Unix-Sek. oder -ms)   (optional)
+        🧾 **Beleg:** VERKAUFT | ASK | SCHÄTZUNG   (optional; auch `Label:` oder `Wert:`; Chip auf der Karte.
+                                             Grün + ASK/SCHÄTZUNG → App stuft auf Gelb herab)
         📦 **Kategorie:** Laptop | MacBook | Mini-PC | Grafikkarte | Konsole/Handheld | Handy | PC-Hardware | RAM/SSD | Sonstiges
                                            (optional, hat Vorrang vor der automatischen Erkennung)
 Header: Click: <Anzeigen-Link>   → Knopf „Öffnen“
@@ -78,6 +85,7 @@ Vorschaubilder werden nur über **https** geladen.
 ### Ein Fund pro Anzeige: Erinnerungen und Doppelungen
 - Die App fasst Nachrichten zum selben Fund zusammen. Erkannt wird das am **Link** (`Click` bzw. `link`, ohne `#` und `/` am Ende). Fehlt der Link, zählen **Gerät + Quelle**.
 - Eine **Erinnerung** (Titel beginnt mit ⏰ oder „Erinnerung“) aktualisiert nur die Endzeit des bestehenden Fundes, und der Fund erscheint dann unter „Endet bald“. Sie zählt **nicht** noch einmal in „Gewinn heute“, und es gibt kein zweites Mega-Vollbild.
+- Ein Fund **ohne Ampel** (keine Ampel-Zeile, kein 🟡/🔴 im Titel, keine Farb-Tags) ist ab v7 **gelb**. Grün bleibt er nur mit Schatz-Titel („💎 SCHATZ GEFUNDEN“, „🔥💎 MEGA-SCHATZ“) oder grünem Tag (`green_circle`, `large_green_circle`, `gem`, `gem_stone`).
 - Eine Erinnerung ohne Ampel und ohne bekannten Fund ist **nicht** automatisch grün. Sie steht nur unter „Endet bald“ (orange).
 - Für die Bots heißt das: Bei Erinnerungen bitte denselben `Click`-Link wie beim Original mitschicken.
 
@@ -99,6 +107,7 @@ DATA: {"geraet":"HP EliteDesk 800 G4 Mini","preis":30,"gewinn":52,"defekt":"Netz
 | `mega` | true/false | Mega-Schatz erzwingen (optional) |
 | `kategorie` | Text | `Laptop`, `MacBook`, `Mini-PC`, `Grafikkarte`, `Konsole/Handheld`, `Handy`, `PC-Hardware`, `RAM/SSD` oder `Sonstiges` (optional, hat Vorrang; Aliase wie `handy`/`iphone` bzw. `cpu`/`mainboard`/`gaming-pc`) |
 | `bild` | https-URL | Vorschaubild (optional, sonst `Attach`) |
+| `label` (oder `beleg` / `wert`) | `VERKAUFT` / `ASK` / `SCHÄTZUNG` | Woher der Verkaufswert stammt (optional). Wird als Chip gezeigt. `ampel: gruen` mit `ASK` oder `SCHÄTZUNG` → App zeigt Gelb |
 
 Fehlende Felder im DATA-Block werden aus dem Text bzw. Titel ergänzt. Der Block kann auch am Ende einer normalen, schön formatierten Nachricht stehen. In der ntfy-App sieht man ihn dann als letzte Zeile.
 
@@ -106,7 +115,7 @@ Beispiel:
 ```
 curl -H "Title: 💎 SCHATZ GEFUNDEN – Lenovo M720q" -H "Tags: moneybag,green_circle" -H "Priority: high" \
      -H "Markdown: yes" -H "Click: https://www.kleinanzeigen.de/s-anzeige/…" \
-     -d $'🟢 **Ampel:** Grün\n💶 **Preis:** 22 € inkl. Versand\n📈 **Gewinn netto:** ca. 45 €\n🔧 **Defekt:** ohne RAM/SSD\n📍 **Quelle:** Kleinanzeigen · Versand' \
+     -d $'🟢 **Ampel:** Grün\n💶 **Preis:** 22 € inkl. Versand\n📈 **Gewinn netto:** ca. 45 €\n🔧 **Defekt:** ohne RAM/SSD\n📍 **Quelle:** Kleinanzeigen · Versand\n🧾 **Beleg:** VERKAUFT' \
      https://ntfy.sh/<thema>
 ```
 

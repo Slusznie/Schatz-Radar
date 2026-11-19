@@ -98,6 +98,8 @@ header.top{display:flex;align-items:center;gap:12px;padding:6px 0 10px}
 .chip.dp{background:rgba(232,135,58,.15);color:var(--orange);border-color:rgba(232,135,58,.35)}
 .chip.mg{background:linear-gradient(90deg,#f6c453,#e8873a);color:#2a1700;border:0}
 .chip.end{background:rgba(239,90,90,.14);color:var(--red);border-color:rgba(239,90,90,.35)}
+.chip.lb-v{background:rgba(47,210,122,.14);color:var(--green);border-color:rgba(47,210,122,.35)}
+.chip.lb-a,.chip.lb-s{background:rgba(243,195,60,.14);color:var(--yellow);border-color:rgba(243,195,60,.35)}
 .deal h3{font-size:1.08rem;font-weight:800;line-height:1.25}
 .deal .def{color:var(--muted);font-size:.88rem;margin-top:4px;line-height:1.3}
 .deal .meta{color:var(--muted);font-size:.78rem;margin-top:6px}
@@ -293,6 +295,10 @@ label.chk input{width:22px;height:22px;accent-color:var(--accent)}
         <h2>🧮 Max-Preis-Rechner</h2>
         <p class="sub">Was darf ich höchstens zahlen? Alle Werte in Euro. Standardwerte sind Vorschläge, du kannst sie ändern – sie werden gespeichert.</p>
         <label class="f" style="margin-bottom:10px">Gerät / Teil (optional)<input id="k_name" type="text" placeholder="z. B. Lenovo M720q ohne RAM/SSD"></label>
+        <div class="grid2" style="margin-bottom:10px">
+          <label class="f">Fundtyp<select id="k_typ"><option value="schatz" selected>Schatz (≥ 60 € netto)</option><option value="flip">Mini-PC-Flip (≥ 40 € netto)</option></select></label>
+          <label class="f">Verkaufswert ist …<select id="k_lab"><option value="VERKAUFT">VERKAUFT (echte Verkäufe)</option><option value="ASK">ASK (nur Angebotspreis)</option><option value="SCHÄTZUNG" selected>SCHÄTZUNG</option></select></label>
+        </div>
         <div class="grid2">
           <label class="f">Verkaufswert repariert (€)<input id="k_vk" type="number" inputmode="decimal" min="0" step="1" value="220"></label>
           <label class="f">Teilewert / Ausschlachten (€)<input id="k_tw" type="number" inputmode="decimal" min="0" step="1" value="60"></label>
@@ -306,7 +312,7 @@ label.chk input{width:22px;height:22px;accent-color:var(--accent)}
           <label class="f">Arbeitszeit (Std.)<input id="k_h" type="number" inputmode="decimal" min="0" step="0.25" value="1.5"></label>
           <label class="f">Stundensatz (€/Std.)<input id="k_sl" type="number" inputmode="decimal" min="0" step="1" value="15"></label>
           <label class="f">Kollegenanteil (% vom Gewinn)<input id="k_ka" type="number" inputmode="decimal" min="0" max="90" step="1" value="25"></label>
-          <label class="f">Wunschgewinn für dich (€)<input id="k_wg" type="number" inputmode="decimal" min="0" step="1" value="40"></label>
+          <label class="f">Wunschgewinn für dich (€, mind. Schwelle)<input id="k_wg" type="number" inputmode="decimal" min="0" step="1" value="60"></label>
         </div>
         <label class="f" style="margin-top:10px">Angebotspreis inkl. Versand (€, optional – zum Prüfen eines Fundes)<input id="k_ek" type="number" inputmode="decimal" min="0" step="0.5" placeholder="leer = mit Max-Preis rechnen"></label>
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="k_reset">↺ Standardwerte</button></div>
@@ -316,7 +322,7 @@ label.chk input{width:22px;height:22px;accent-color:var(--accent)}
         <div class="max" id="k_max">–</div>
         <div class="ampel gruen" id="k_amp">● –</div>
         <div class="rows" id="k_rows"></div>
-        <p class="note">Ampel nach deinem Gewinn pro Stunde (nach Kollegenanteil): <b>grün ≥ 20 €/Std.</b>, gelb 10–20 €/Std., <b>rot &lt; 10 €/Std.</b> oder wenn der Max-Preis bei 0 € liegt. Der Teilewert ist die Untergrenze für den erwarteten Verkaufswert.</p>
+        <p class="note">Ampel nach deinem Netto-Gewinn (nach Gebühren, Versand, Teilen und Kollegenanteil): <b>grün</b> ab der Schwelle – Schatz ≥ 60 €, Mini-PC-Flip ≥ 40 € – <b>und nur mit VERKAUFT-Wert</b>. Gelb: Gewinn über 0 €, aber unter der Schwelle, oder Wert nur ASK/SCHÄTZUNG. <b>Rot:</b> Gewinn ≤ 0 € oder Max-Preis bei 0 €. Der Max-Preis rechnet mindestens mit der Schwelle als Gewinn. Gewinn pro Stunde ist nur noch Info. Der Teilewert ist die Untergrenze für den erwarteten Verkaufswert.</p>
       </div>
     </div>
   </section>
@@ -341,7 +347,7 @@ label.chk input{width:22px;height:22px;accent-color:var(--accent)}
     </div>
     <div class="panel">
       <h2>ℹ️ So kommen Funde rein</h2>
-      <p class="sub">Die App liest die Nachrichten der letzten 24 Std. aus dem ntfy-Thema (ntfy.sh hebt sie ca. 12 Std. auf) und blendet Testnachrichten aus. Titel „💎 SCHATZ GEFUNDEN – Gerät“ = grün, „🔥💎 MEGA-SCHATZ“ = Mega, „🟡 GRENZFALL“ / „🟡 NACHFRAGEN“ = gelb, „⏰“ = endet bald. Oben filterst du nach Farbe, Kategorie, Plattform, Preis, Gewinn und mehr. Das genaue Format steht in der README.</p>
+      <p class="sub">Die App liest die Nachrichten der letzten 24 Std. aus dem ntfy-Thema (ntfy.sh hebt sie ca. 12 Std. auf) und blendet Testnachrichten aus. Titel „💎 SCHATZ GEFUNDEN – Gerät“ = grün, „🔥💎 MEGA-SCHATZ“ = Mega, „🟡 GRENZFALL“ / „🟡 NACHFRAGEN“ = gelb, „⏰“ = endet bald. Funde ohne Ampel und ohne Schatz-Titel landen in Gelb. Grüne Funde mit Wert „ASK“ oder „SCHÄTZUNG“ werden auf Gelb gestuft. Oben filterst du nach Farbe, Kategorie, Plattform, Preis, Gewinn und mehr. Das genaue Format steht in der README.</p>
     </div>
   </section>
 </div>
@@ -430,6 +436,17 @@ var SR = (function(){
     return null;
   }
 
+  // Preis-Label des Verkaufswerts: VERKAUFT / ASK / SCHÄTZUNG (sonst null)
+  function normLabel(a){
+    var x = String(a==null?"":a).toLowerCase();
+    if (/verkauft|\bsold\b/.test(x)) return "VERKAUFT";
+    if (/schätz|schaetz|schatzung|\bestimate/.test(x)) return "SCHÄTZUNG";
+    if (/\bask\b|angebotspreis/.test(x)) return "ASK";
+    return null;
+  }
+  var LABEL_KEYS = ["beleg","label","wert","preis-label","preislabel","wert-label","vk-label"];
+  var GREEN_TAGS = ["green_circle","large_green_circle","gem","gem_stone"];
+
   // Endzeit: ISO, Unix-Sekunden, "HH:MM" (heute/morgen), "in 30 Min", "in 2 Std"
   function parseEnde(v, refSec){
     if (v == null || v === "") return null;
@@ -480,7 +497,7 @@ var SR = (function(){
       quelle: pick(f,["quelle","plattform"]),
       link: msg.click || null,
       bild: (msg.attachment && msg.attachment.url && (!msg.attachment.type || /^image\//.test(msg.attachment.type))) ? msg.attachment.url : null,
-      ampel: null, endeTxt: pick(f,["endet","ende","läuft ab","laeuft ab","auktionsende"]),
+      ampel: null, label: normLabel(pick(f,LABEL_KEYS)), endeTxt: pick(f,["endet","ende","läuft ab","laeuft ab","auktionsende"]),
       titelEnde: (/⏰|endet/i.test(title) ? title.split(/\s[–—-]\s/)[0] : null),
       mega: /mega-?schatz/i.test(title) || /🔥/.test(title),
       erinnerung: /⏰|^\s*erinnerung/i.test(title),
@@ -501,6 +518,8 @@ var SR = (function(){
       if (d.ampel) deal.ampel = normAmpel(d.ampel) || deal.ampel;
       if (d.ende != null) deal.endeTxt = d.ende;
       if (d.mega != null) deal.mega = !!d.mega;
+      var dl = d.label != null ? d.label : (d.beleg != null ? d.beleg : d.wert);
+      if (dl != null && normLabel(dl)) deal.label = normLabel(dl);
     }
     if (deal.link && !/^https?:\/\//i.test(deal.link)) deal.link = null;
     deal.bild = safeImageUrl(deal.bild);
@@ -516,9 +535,20 @@ var SR = (function(){
     deal.kategorie = detectCategoryFromParts(deal.geraet, title, body, explKat);
     if (deal.ampel === "rot") return null; // rote Funde gehören nicht aufs Radar
     // Erinnerung ohne Ampel: nicht automatisch grün (zählt nicht in "Gewinn heute", nur "Endet bald")
-    if (!deal.ampel) deal.ampel = deal.erinnerung ? "offen" : "gruen";
+    // Sonst ohne Ampel: nur Schatz-Titel (💎 / SCHATZ GEFUNDEN / MEGA-SCHATZ) oder grüne Tags = grün, alles andere gelb
+    if (!deal.ampel){
+      var greenTag = tags.some(function(x){ return GREEN_TAGS.indexOf(String(x)) >= 0; });
+      deal.ampel = deal.erinnerung ? "offen" : ((/💎|schatz gefunden|mega-?schatz/i.test(title) || greenTag) ? "gruen" : "gelb");
+    }
+    downgrade(deal);
     if (deal.erinnerung){ deal.mega = false; if (!deal.ende) deal.endetBaldFlag = true; }
     deal.key = dealKey(deal);
+    return deal;
+  }
+
+  // Grün nur mit VERKAUFT-Wert: ausdrücklich ASK/SCHÄTZUNG → gelb
+  function downgrade(deal){
+    if (deal.ampel === "gruen" && (deal.label === "ASK" || deal.label === "SCHÄTZUNG")){ deal.ampel = "gelb"; deal.herabgestuft = true; }
     return deal;
   }
 
@@ -552,8 +582,9 @@ var SR = (function(){
       inc._wasReminder = true; return {deal: inc, neu: false};
     }
     // Doppelt gesendeter Fund: fehlende Werte ergänzen, nicht neu zählen
-    ["preis","preisTxt","gewinn","gewinnTxt","defekt","quelle","bild","ende","kategorie"].forEach(function(k){ e[k] = keep(e[k], inc[k]); });
+    ["preis","preisTxt","gewinn","gewinnTxt","defekt","quelle","bild","ende","kategorie","label"].forEach(function(k){ e[k] = keep(e[k], inc[k]); });
     if (inc.ende) e.ende = inc.ende;
+    downgrade(e);
     return {deal: e, neu: false};
   }
 
@@ -603,17 +634,28 @@ var SR = (function(){
     var erloes = erwartet*(1-g) - (i.versandRaus||0);
     var direkt = (i.versandRein||0) + (i.ersatzteile||0);
     var lohn = (i.stunden||0)*(i.stundensatz||0);
-    var maxEk = erloes - direkt - ((i.wunsch||0) + lohn)/(1-k);
+    var typ = i.typ === "flip" ? "flip" : "schatz";
+    var schwelle = i.schwelle != null && !isNaN(i.schwelle) ? +i.schwelle : (typ === "flip" ? 40 : 60);
+    var label = normLabel(i.label) || "SCHÄTZUNG";
+    var ziel = Math.max(i.wunsch||0, schwelle); // Max-EK rechnet mindestens mit der Schwelle
+    var maxEk = erloes - direkt - (ziel + lohn)/(1-k);
     var ek = (i.angebot != null && i.angebot !== "" && !isNaN(i.angebot)) ? +i.angebot : Math.max(maxEk,0);
     var roh = erloes - direkt - ek;
     var anteil = roh > 0 ? roh*k : 0;
     var dein = roh - anteil;
     var proStd = (i.stunden||0) > 0 ? dein/(i.stunden) : null; // 0 Std. → kein Stundenwert
-    var ampel = proStd != null ? (proStd >= 20 ? "gruen" : (proStd < 10 ? "rot" : "gelb"))
-                               : (dein >= (i.wunsch||0) && dein > 0 ? "gruen" : (dein > 0 ? "gelb" : "rot"));
-    if (maxEk <= 0 && (i.angebot == null || i.angebot === "")) ampel = "rot";
+    // Ampel nach Netto-Gewinn (dein Gewinn) und Preis-Label; Gewinn/Std. ist nur Info
+    var grund;
+    var ampel;
+    if (dein <= 0){ ampel = "rot"; grund = "kein Gewinn"; }
+    else if (dein + 1e-9 >= schwelle){
+      if (label === "VERKAUFT"){ ampel = "gruen"; grund = "≥ "+schwelle+" € netto, VERKAUFT"; }
+      else { ampel = "gelb"; grund = "≥ "+schwelle+" € netto, aber nur "+label; }
+    } else { ampel = "gelb"; grund = "unter "+schwelle+" € netto"; }
+    if (maxEk <= 0 && (i.angebot == null || i.angebot === "")){ ampel = "rot"; grund = "Max-Preis 0 €"; }
     return {erwartet:erwartet, gebuehren:erwartet*g, erloes:erloes, direkt:direkt, lohn:lohn, maxEk:maxEk,
-            ek:ek, roh:roh, anteil:anteil, dein:dein, nachLohn:dein-lohn, proStd:proStd, ampel:ampel};
+            ek:ek, roh:roh, anteil:anteil, dein:dein, nachLohn:dein-lohn, proStd:proStd, ampel:ampel,
+            typ:typ, schwelle:schwelle, ziel:ziel, label:label, grund:grund};
   }
 
 
@@ -856,7 +898,7 @@ var SR = (function(){
     {id:"ende", label:"Endet zuerst"}
   ];
 
-  return {safeImageUrl:safeImageUrl,dealKey:dealKey,mergeDeal:mergeDeal,eur:eur,eurSigned:eurSigned,toNum:toNum,isTest:isTest,parseMessage:parseMessage,parseData:parseData,parseEnde:parseEnde,isMega:isMega,
+  return {normLabel:normLabel,downgrade:downgrade,safeImageUrl:safeImageUrl,dealKey:dealKey,mergeDeal:mergeDeal,eur:eur,eurSigned:eurSigned,toNum:toNum,isTest:isTest,parseMessage:parseMessage,parseData:parseData,parseEnde:parseEnde,isMega:isMega,
           endetBald:endetBald,berlinParts:berlinParts,nextRound:nextRound,isNight:isNight,calc:calc,pad:pad,
           CAT_LIST:CAT_LIST,CAT_ICON:CAT_ICON,CAT_TINT:CAT_TINT,normKategorie:normKategorie,detectCategory:detectCategory,categoryOf:categoryOf,
           matchesTab:matchesTab,filterDeals:filterDeals,tabCounts:tabCounts,categoryCounts:categoryCounts,
@@ -1104,6 +1146,7 @@ if (typeof module !== "undefined") module.exports = SR;
     if (katName) chips += '<span class="chip kat"'+(katTint?' style="color:'+katTint+';border-color:'+katTint+'44"':'')+'>'+(katIcon?esc(katIcon)+' ':'')+esc(katName)+'</span>';
     if (d.plattform) chips += '<span class="chip pf">'+esc(d.plattform)+'</span>';
     if (d.abholung) chips += '<span class="chip dp">Dörpen</span>';
+    if (d.label) chips += '<span class="chip '+({"VERKAUFT":"lb-v","ASK":"lb-a","SCHÄTZUNG":"lb-s"}[d.label]||"")+'"'+(d.herabgestuft?' title="Grün gemeldet, aber ohne VERKAUFT-Wert → Gelb"':'')+'>'+(d.label==="VERKAUFT"?"✅ ":"")+esc(d.label)+(d.herabgestuft?' · ↓ Gelb':'')+'</span>';
     var endTxt = "", bar = "";
     if (d.ende){
       var rest = d.ende - now;
@@ -1251,19 +1294,25 @@ if (typeof module !== "undefined") module.exports = SR;
 
   /* ---------- Rechner ---------- */
   var K = ["vk","tw","geb","et","vr","vo","h","sl","ka","wg"];
-  var KDEF = {vk:220,tw:60,geb:13,et:30,vr:6,vo:6,h:1.5,sl:15,ka:25,wg:40};
-  function loadCalc(){ var c = store.get("calc",{}); K.forEach(function(k){ if (c[k]!=null) $("k_"+k).value = c[k]; }); $("k_unklar").checked = !!c.unklar; }
+  var KDEF = {vk:220,tw:60,geb:13,et:30,vr:6,vo:6,h:1.5,sl:15,ka:25,wg:60};
+  var SCHWELLE = {schatz:60, flip:40};
+  function loadCalc(){ var c = store.get("calc",{}); K.forEach(function(k){ if (c[k]!=null) $("k_"+k).value = c[k]; }); $("k_unklar").checked = !!c.unklar;
+    if (c.typ) $("k_typ").value = c.typ;
+    if (c.lab) $("k_lab").value = c.lab;
+    var sw0 = SCHWELLE[$("k_typ").value] || 60;
+    if (c.wg == null || parseFloat(c.wg) < sw0) $("k_wg").value = sw0; } // alter Wunsch 40 € → auf Schwelle anheben
   function num(id){ var v = $(id).value; return v===""?0:parseFloat(String(v).replace(",",".")); }
   function runCalc(){
-    var c = {}; K.forEach(function(k){ c[k] = $("k_"+k).value; }); c.unklar = $("k_unklar").checked; store.set("calc", c);
+    var c = {}; K.forEach(function(k){ c[k] = $("k_"+k).value; }); c.unklar = $("k_unklar").checked; c.typ = $("k_typ").value; c.lab = $("k_lab").value; store.set("calc", c);
     var ang = $("k_ek").value;
     var r = SR.calc({verkauf:num("k_vk"),teilewert:num("k_tw"),unklar:$("k_unklar").checked,gebuehr:num("k_geb"),ersatzteile:num("k_et"),
       versandRein:num("k_vr"),versandRaus:num("k_vo"),stunden:num("k_h"),stundensatz:num("k_sl"),kollege:num("k_ka"),wunsch:num("k_wg"),
+      typ:$("k_typ").value,label:$("k_lab").value,
       angebot: ang===""?null:parseFloat(ang.replace(",","."))});
     $("k_max").textContent = r.maxEk > 0 ? eur(r.maxEk,2) : "0 € – Finger weg";
     $("k_res").className = "res "+(r.maxEk<=0?"rot":"");
     var at = {gruen:"🟢 Grün",gelb:"🟡 Gelb",rot:"🔴 Rot"}[r.ampel];
-    $("k_amp").className = "ampel "+r.ampel; $("k_amp").textContent = at+" · "+(r.proStd==null?"– €/Std. (Ampel nach Gewinn)":eur(r.proStd,2)+"/Std.")+(ang===""?" (bei Max-Preis)":" (bei "+eur(parseFloat(ang.replace(",",".")),2)+")");
+    $("k_amp").className = "ampel "+r.ampel; $("k_amp").textContent = at+" · "+eur(r.dein,2)+" netto – "+r.grund+(ang===""?" (bei Max-Preis)":" (bei "+eur(parseFloat(ang.replace(",",".")),2)+")");
     var rows = [
       ["Erwarteter Verkaufswert"+($("k_unklar").checked?" (60/40)":""), eur(r.erwartet,2)],
       ["− Gebühren "+num("k_geb")+" %", eur(-r.gebuehren,2)],
@@ -1272,18 +1321,23 @@ if (typeof module !== "undefined") module.exports = SR;
       ["Einkaufspreis gerechnet", eur(-r.ek,2)],
       ["= Rohgewinn", eur(r.roh,2), 1],
       ["− Kollegenanteil "+num("k_ka")+" %", eur(-r.anteil,2)],
-      ["= Dein Gewinn", eur(r.dein,2), 1],
+      ["= Dein Gewinn (netto)", eur(r.dein,2), 1],
+      ["Schwelle "+(r.typ==="flip"?"Mini-PC-Flip":"Schatz")+" · Wert "+r.label, "≥ "+eur(r.schwelle)],
       ["Arbeitszeit "+num("k_h")+" Std. × "+eur(num("k_sl"))+" (eingerechnet)", eur(r.lohn,2)],
-      ["Gewinn pro Stunde", r.proStd==null ? "–" : eur(r.proStd,2)+"/Std.", 1]
+      ["Gewinn pro Stunde (nur Info)", r.proStd==null ? "–" : eur(r.proStd,2)+"/Std."]
     ];
     $("k_rows").innerHTML = rows.map(function(x){ return '<div'+(x[2]?' class="tot"':'')+'><span>'+esc(x[0])+'</span><span>'+esc(x[1])+'</span></div>'; }).join("");
   }
-  K.concat(["unklar","ek"]).forEach(function(k){ $("k_"+k).addEventListener("input", runCalc); });
-  $("k_reset").onclick = function(){ K.forEach(function(k){ $("k_"+k).value = KDEF[k]; }); $("k_unklar").checked=false; $("k_ek").value=""; $("k_name").value=""; runCalc(); };
+  K.concat(["unklar","ek","lab"]).forEach(function(k){ $("k_"+k).addEventListener("input", runCalc); });
+  $("k_lab").addEventListener("change", runCalc);
+  // Fundtyp wechselt → Wunschgewinn auf die neue Schwelle setzen
+  $("k_typ").addEventListener("change", function(){ $("k_wg").value = SCHWELLE[$("k_typ").value] || 60; runCalc(); });
+  $("k_reset").onclick = function(){ K.forEach(function(k){ $("k_"+k).value = KDEF[k]; }); $("k_unklar").checked=false; $("k_ek").value=""; $("k_name").value=""; $("k_typ").value="schatz"; $("k_lab").value="SCHÄTZUNG"; runCalc(); };
   function toCalc(d){
     if (!d) return;
     $("k_name").value = d.geraet; $("k_ek").value = d.preis!=null ? d.preis : "";
     $("k_unklar").checked = /geht nicht an|ungetestet|unklar|unbekannt|kein bild/i.test(d.defekt||"");
+    $("k_lab").value = d.label || "SCHÄTZUNG";
     runCalc(); showView("calc");
   }
 
@@ -1319,7 +1373,7 @@ if (typeof module !== "undefined") module.exports = SR;
     var n = nowSec();
     var M = [
       {id:"d1",time:n-1500,title:"🔥💎 MEGA-SCHATZ – ThinkPad T480s i7 16GB 512GB",message:"🟢 **Ampel:** Grün\n💶 **Preis:** 85 € inkl. Versand\n📈 **Gewinn netto:** ca. 125 €\n🔧 **Defekt:** Displayglas gesprungen, sonst ok\n📍 **Quelle:** Kleinanzeigen · Versand",click:"https://www.kleinanzeigen.de"},
-      {id:"d2",time:n-900,title:"💎 SCHATZ GEFUNDEN – Lenovo M720q",message:"🟢 **Ampel:** Grün\n💶 **Preis:** 22 € inkl. Versand\n📈 **Gewinn netto:** ca. 45 €\n🔧 **Defekt:** ohne RAM/SSD\n📍 **Quelle:** eBay · Versand",click:"https://www.ebay.de"},
+      {id:"d2",time:n-900,title:"💎 SCHATZ GEFUNDEN – Lenovo M720q",message:"🟢 **Ampel:** Grün\n💶 **Preis:** 22 € inkl. Versand\n🧾 **Beleg:** VERKAUFT\n📈 **Gewinn netto:** ca. 45 €\n🔧 **Defekt:** ohne RAM/SSD\n📍 **Quelle:** eBay · Versand",click:"https://www.ebay.de"},
       {id:"d3",time:n-5400,title:"💎 SCHATZ GEFUNDEN – HP EliteDesk 800 G4 Mini",message:"DATA: {\"geraet\":\"HP EliteDesk 800 G4 Mini i5-8500\",\"preis\":30,\"gewinn\":52,\"defekt\":\"Netzteil fehlt\",\"quelle\":\"Kleinanzeigen · Abholung Dörpen\",\"ampel\":\"gruen\"}"},
       {id:"d4",time:n-3000,title:"🟡 GRENZFALL – Dell OptiPlex 7070 Micro",message:"🟡 **Ampel:** Gelb\n💶 **Preis:** 60 € inkl. Versand\n📈 **Gewinn netto:** ca. 28 €\n🔧 **Defekt:** geht nicht an (ungetestet)\n📍 **Quelle:** Vinted"},
       {id:"d5",time:n-7000,title:"⏰ Endet in 40 Min – Nintendo Switch Board",message:"DATA: {\"geraet\":\"Nintendo Switch Mainboard\",\"preis\":35,\"gewinn\":38,\"defekt\":\"Ladechip defekt\",\"quelle\":\"eBay Auktion\",\"ampel\":\"gelb\",\"ende\":\""+new Date((n+2400)*1000).toISOString()+"\"}"},
