@@ -53,7 +53,7 @@ header.top{display:flex;align-items:center;gap:12px;padding:6px 0 10px}
 .sum span{color:var(--muted);font-size:.95rem}
 .next{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:.95rem;margin-top:4px}
 .next .cd{font-variant-numeric:tabular-nums;font-weight:800;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:3px 10px}
-.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
 .tile{background:var(--card2);border:1px solid var(--line);border-radius:18px;padding:12px 14px;text-align:left;transition:transform .15s,border-color .2s}
 .tile:active{transform:scale(.97)}
 .tile .t{font-size:.85rem;color:var(--muted);font-weight:600}
@@ -62,7 +62,8 @@ header.top{display:flex;align-items:center;gap:12px;padding:6px 0 10px}
 .tile.g{border-left:5px solid var(--green)} .tile.g .s{color:var(--green)}
 .tile.y{border-left:5px solid var(--yellow)} .tile.y .s{color:var(--yellow)}
 .tile.e{border-left:5px solid var(--orange)} .tile.e .s{color:var(--orange)}
-.tile.sel{border-color:var(--accent)}
+.tile.a{border-left:5px solid var(--accent)} .tile.a .s{color:var(--accent)}
+.tile.sel{border-color:var(--accent);background:var(--accent-bg)}
 /* Tabs & Kategorie-Chips (groß für Tablet-Touch) */
 .tabs{display:flex;gap:6px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:6px;margin:18px 0 10px}
 .tabs button{flex:1 1 22%;min-width:0;min-height:48px;border-radius:16px;padding:10px 8px;font-weight:700;color:var(--muted);font-size:.92rem;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .2s,color .2s}
@@ -190,7 +191,7 @@ label.chk input{width:22px;height:22px;accent-color:var(--accent)}
 @media (min-width:900px){
   .wrap{padding:20px 28px}
   .heroRow{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;align-items:stretch}
-  .tiles{margin-top:0;grid-template-columns:1fr;grid-template-rows:repeat(3,1fr)}
+  .tiles{margin-top:0;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr)}
   .tile{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .tile .n{order:2;font-size:2.2rem}
   .tabs{display:flex;margin-top:18px}
@@ -231,16 +232,11 @@ label.chk input{width:22px;height:22px;accent-color:var(--accent)}
         <div class="next">⏱ Nächste Suchrunde <span class="cd" id="nextAt">--:--</span> in <span class="cd" id="nextCd">--:--:--</span></div>
       </div>
       <div class="tiles">
+        <button class="tile a sel" data-tab="alle"><div><div class="t">Alle</div><div class="s" id="sA">–</div></div><div class="n" id="nA">0</div></button>
         <button class="tile g" data-tab="gruen"><div><div class="t">Grün (Sofort)</div><div class="s" id="sG">–</div></div><div class="n" id="nG">0</div></button>
         <button class="tile y" data-tab="gelb"><div><div class="t">Gelb (Prüfen)</div><div class="s" id="sY">–</div></div><div class="n" id="nY">0</div></button>
         <button class="tile e" data-tab="ende"><div><div class="t">Endet bald</div><div class="s" id="sE">&lt; 3 Std.</div></div><div class="n" id="nE">0</div></button>
       </div>
-    </div>
-    <div class="tabs" id="tabs" role="tablist">
-      <button data-tab="alle" class="act" role="tab" aria-selected="true">Alle <span class="tabn" id="tA">0</span></button>
-      <button data-tab="gruen" role="tab" aria-selected="false">💎 Grün <span class="tabn" id="tG">0</span></button>
-      <button data-tab="gelb" role="tab" aria-selected="false">🟡 Gelb <span class="tabn" id="tY">0</span></button>
-      <button data-tab="ende" role="tab" aria-selected="false">⏰ Endet bald <span class="tabn" id="tE">0</span></button>
     </div>
     <div class="katbar" id="katbar" aria-label="Kategorien"></div>
     <div class="sf" id="sf">
@@ -1143,13 +1139,13 @@ if (typeof module !== "undefined") module.exports = SR;
     $("cntToday").textContent = todays.length ? todays.length+" Fund"+(todays.length>1?"e":"")+" heute"+(sumY?" · +"+eur(sumY)+" gelb":"") : "";
     var megas = gAll.filter(function(d){ return SR.isMega(d,cfg.mega); }).length;
     // Kacheln: Gesamtzahlen (unabhängig von Kategorie und Extra-Filtern)
-    $("nG").textContent = gAll.length; $("nY").textContent = yAll.length; $("nE").textContent = eAll.length;
+    var tc = SR.tabCounts(all, kat, now, extras, cfg.mega);
+    $("nA").textContent = tc.alle; $("nG").textContent = tc.gruen; $("nY").textContent = tc.gelb; $("nE").textContent = tc.ende;
+    $("sA").textContent = (kat && kat!=="alle") || SR.countActiveFilters(extras) > 0 ? "gefiltert" : "alle Funde";
     $("sG").textContent = megas ? "💎 "+megas+" Mega" : (gAll.length ? "↗ "+eur(gAll.reduce(function(s,d){return s+(d.gewinn||0);},0)) : "–");
     $("sY").textContent = yAll.length ? yAll.length+" Deal(s) prüfen" : "–";
     $("sE").textContent = "< 3 Std.";
     // Tab-Badges und Listen: Kategorie + Extra-Filter (ohne den Tab selbst)
-    var tc = SR.tabCounts(all, kat, now, extras, cfg.mega);
-    $("tA").textContent = tc.alle; $("tG").textContent = tc.gruen; $("tY").textContent = tc.gelb; $("tE").textContent = tc.ende;
     var g = SR.sortDeals(SR.filterDeals(all, "gruen", kat, now, extras, cfg.mega), sortMode);
     var y = SR.sortDeals(SR.filterDeals(all, "gelb", kat, now, extras, cfg.mega), sortMode);
     var e = SR.sortDeals(SR.filterDeals(all, "ende", kat, now, extras, cfg.mega), sortMode);
